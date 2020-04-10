@@ -1028,11 +1028,10 @@ namespace TexttoXls
                 {
                     JObject rowobj = new JObject();
                     IRow row = sheet.GetRow(i);
-
-                    short rowheight = (short)(row.Height / 20);
-                    rowheightobj.Add("L" + i.ToString(), rowheight);
                     if (row != null)
                     {
+                        short rowheight = (short)(row.Height / 20);
+                        rowheightobj.Add("L" + i.ToString(), rowheight);
                         //MessageBox.Show(row.LastCellNum.ToString());
                         for (int j = 0; j <= row.LastCellNum; j++)
                         {
