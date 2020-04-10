@@ -16,12 +16,9 @@ using System.Windows.Forms;
 //20200227
 using NPOI.CSS;
 using NPOI.HSSF.Util;
-
 using Microsoft.Office.Interop;
 using NPOI.SS.Converter;
 using System.Text;
-
-
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
@@ -60,13 +57,14 @@ namespace TexttoXls
         string XlsToJson(string xls);
       
     }
+
     [Guid("34F268AE-FDA9-4757-92ED-DF6AEB7D490E")]
     [ClassInterface(ClassInterfaceType.None)]
-    public class ConvertXls : IConvertXls
+
+    public partial class ConvertXls : IConvertXls
     {
         private HSSFWorkbook wb = null;
         private string xlsfile = "";
-
 
         public void openxls(string xls)
         {
@@ -762,238 +760,17 @@ namespace TexttoXls
             //}
         }
 
-        private string returnfontcolor(short color)
-        {
-
-            string Result = "font - color:";
-            HSSFPalette mypalette = new HSSFPalette(new PaletteRecord());
-            HSSFColor hssFColor = mypalette.GetColor(color);
-            if (hssFColor == null) return "";
-            byte[] rgb = hssFColor.RGB;
-            int r = rgb[0];
-            int g = rgb[1];
-            int b = rgb[2];
-            string R = Convert.ToString(r, 16);
-            if (R == "0")
-                R = "00";
-            string G = Convert.ToString(g, 16);
-            if (G == "0")
-                G = "00";
-            string B = Convert.ToString(b, 16);
-            if (B == "0")
-                B = "00";
-            Result = Result + "#" + R + G + B + ";";
-            return Result;
-        }
-        private string ConvertHorizontalAlignmentToString(NPOI.SS.UserModel.HorizontalAlignment alignment)
-        {
-            string Result = "text-align:";
-            switch (alignment)
-            {
-                case NPOI.SS.UserModel.HorizontalAlignment.Left:
-                    return Result + "LEFT;";
-                case NPOI.SS.UserModel.HorizontalAlignment.Center:
-                    return Result + "CENTER;";
-                case NPOI.SS.UserModel.HorizontalAlignment.CenterSelection:
-                    return Result + "CENTER_SELECTION;";
-                case NPOI.SS.UserModel.HorizontalAlignment.Right:
-                    return Result + "RIGHT;";
-                case NPOI.SS.UserModel.HorizontalAlignment.Distributed:
-                    return Result + "DISTRIBUTED;";
-                case NPOI.SS.UserModel.HorizontalAlignment.Fill:
-                    return Result + "FILL;";
-                case NPOI.SS.UserModel.HorizontalAlignment.Justify:
-                    return Result + "JUSTIFY;";
-
-                default:
-                    return "";
-            }
-        }
-        private string ConvertBorderStyleToString(NPOI.SS.UserModel.BorderStyle boderstyle)
-        {
-            string Result = "border-type:";
-            switch (boderstyle)
-            {
-                case NPOI.SS.UserModel.BorderStyle.Thin:
-                    return Result + "THIN;";
-                case NPOI.SS.UserModel.BorderStyle.Medium:
-                    return Result + "MEDIUM;";
-                case NPOI.SS.UserModel.BorderStyle.Dashed:
-                    return Result + "DASHED;";
-                case NPOI.SS.UserModel.BorderStyle.Hair:
-                    return Result + "HAIR;";
-                case NPOI.SS.UserModel.BorderStyle.Thick:
-                    return Result + "THICK;";
-                case NPOI.SS.UserModel.BorderStyle.Double:
-                    return Result + "DOUBLE;";
-                case NPOI.SS.UserModel.BorderStyle.Dotted:
-                    return Result + "DOTTED;";
-                case NPOI.SS.UserModel.BorderStyle.MediumDashed:
-                    return Result + "MEDIUMDASHED;";
-                case NPOI.SS.UserModel.BorderStyle.DashDot:
-                    return Result + "DASHDOT;";
-                case NPOI.SS.UserModel.BorderStyle.MediumDashDot:
-                    return Result + "MEDIUMDASHDOT;";
-                case NPOI.SS.UserModel.BorderStyle.DashDotDot:
-                    return Result + "DASHDOTDOT;";
-                case NPOI.SS.UserModel.BorderStyle.MediumDashDotDot:
-                    return Result + "MEDIUMDASHDOTDOT;";
-                case NPOI.SS.UserModel.BorderStyle.SlantedDashDot:
-                    return Result + "SLANTEDDASHDOT;";
-                default:
-                    return "";
-            }
-
-        }
-        private string GetCellStyle(ICell cell, IWorkbook mywk)
-        {
-            ICellStyle cellStyle = cell.CellStyle;
-            IFont font = cellStyle.GetFont(mywk);
-            string Result = "";
-            short weight = font.Boldweight;   //字体加粗
-            if (weight == 700)
-            {
-                Result = Result + "font-weight:bold;";
-            }
-            else if (weight == 400)
-            {
-                Result = Result + "font-weight:normal;";
-            }
-            short color = font.Color;    //字体颜色
-            Result = Result + returnfontcolor(color);
-
-            string fontname = font.FontName;    //字体类型
-            Result = Result + "font-name:" + fontname + ";";
-
-            double fontsize = font.FontHeightInPoints;    //字体大小
-            Result = Result + "font-size:" + fontsize.ToString() + ";";
-
-            string textalign = ConvertHorizontalAlignmentToString(cellStyle.Alignment); //居中对齐
-            Result = Result + textalign;
-
-            string bordertype = ConvertBorderStyleToString(cellStyle.BorderTop); //边框
-            Result = Result + bordertype;
-            return Result;
-        }
-
-        private struct Dimension
-        {
-            /// <summary>
-            /// 含有数据的单元格(通常表示合并单元格的第一个跨度行第一个跨度列)，该字段可能为null
-            /// </summary>
-            public ICell DataCell;
-
-            /// <summary>
-            /// 行跨度(跨越了多少行)
-            /// </summary>
-            public int RowSpan;
-
-            /// <summary>
-            /// 列跨度(跨越了多少列)
-            /// </summary>
-            public int ColumnSpan;
-
-            /// <summary>
-            /// 合并单元格的起始行索引
-            /// </summary>
-            public int FirstRowIndex;
-
-            /// <summary>
-            /// 合并单元格的结束行索引
-            /// </summary>
-            public int LastRowIndex;
-
-            /// <summary>
-            /// 合并单元格的起始列索引
-            /// </summary>
-            public int FirstColumnIndex;
-
-            /// <summary>
-            /// 合并单元格的结束列索引
-            /// </summary>
-            public int LastColumnIndex;
-        }
-
-        private bool IsMergeCell(ISheet sheet, int rowIndex, int columnIndex, out Dimension dimension)
-        {
-            dimension = new Dimension
-            {
-                DataCell = null,
-                RowSpan = 1,
-                ColumnSpan = 1,
-                FirstRowIndex = rowIndex,
-                LastRowIndex = rowIndex,
-                FirstColumnIndex = columnIndex,
-                LastColumnIndex = columnIndex
-            };
-
-            for (int i = 0; i < sheet.NumMergedRegions; i++)
-            {
-                CellRangeAddress range = sheet.GetMergedRegion(i);
-                sheet.IsMergedRegion(range);
-
-                //这种算法只有当指定行列索引刚好是合并单元格的第一个跨度行第一个跨度列时才能取得合并单元格的跨度
-                //if (range.FirstRow == rowIndex && range.FirstColumn == columnIndex)
-                //{
-                //    dimension.DataCell = sheet.GetRow(range.FirstRow).GetCell(range.FirstColumn);
-                //    dimension.RowSpan = range.LastRow - range.FirstRow + 1;
-                //    dimension.ColumnSpan = range.LastColumn - range.FirstColumn + 1;
-                //    dimension.FirstRowIndex = range.FirstRow;
-                //    dimension.LastRowIndex = range.LastRow;
-                //    dimension.FirstColumnIndex = range.FirstColumn;
-                //    dimension.LastColumnIndex = range.LastColumn;
-                //    break;
-                //}
-
-                if ((rowIndex >= range.FirstRow && range.LastRow >= rowIndex) && (columnIndex >= range.FirstColumn && range.LastColumn >= columnIndex))
-                {
-                    dimension.DataCell = sheet.GetRow(range.FirstRow).GetCell(range.FirstColumn);
-                    dimension.RowSpan = range.LastRow - range.FirstRow + 1;
-                    dimension.ColumnSpan = range.LastColumn - range.FirstColumn + 1;
-                    dimension.FirstRowIndex = range.FirstRow;
-                    dimension.LastRowIndex = range.LastRow;
-                    dimension.FirstColumnIndex = range.FirstColumn;
-                    dimension.LastColumnIndex = range.LastColumn;
-                    break;
-                }
-            }
-
-            bool result;
-            if (rowIndex >= 0 && sheet.LastRowNum > rowIndex)
-            {
-                IRow row = sheet.GetRow(rowIndex);
-                if (columnIndex >= 0 && row.LastCellNum > columnIndex)
-                {
-                    ICell cell = row.GetCell(columnIndex);
-                    result = cell.IsMergedCell;
-
-                    if (dimension.DataCell == null)
-                    {
-                        dimension.DataCell = cell;
-                    }
-                }
-                else
-                {
-                    result = false;
-                }
-            }
-            else
-            {
-                result = false;
-            }
-
-            return result;
-        }
+       
 
         public string XlsToJson(string xls)
         {
             string Result = "";
-
-            if (string.IsNullOrEmpty(xls))
+            //文件不存在就直接退出
+            if ((string.IsNullOrEmpty(xls)) || (! File.Exists(xls)))
             {
                 return "";//没有文件
             }
-            Console.WriteLine("\n\n1--创建json对象:");
+ 
             JObject staff = new JObject();
             FileStream file = new FileStream(xls, FileMode.Open, FileAccess.Read);
             HSSFWorkbook mywk = new HSSFWorkbook(file);
@@ -1064,10 +841,7 @@ namespace TexttoXls
                                         cellobj.Add("_mergeCount", dimension.ColumnSpan-1);
                                     }
                                 }
-                                
                             }
-                            
-
                         }
                     }
                     data.Add("L" + i.ToString(), rowobj);
@@ -1079,6 +853,7 @@ namespace TexttoXls
             }
             staff.Add("sheets", sheets);
             Result = staff.ToString();
+            
             return Result;
 
 
