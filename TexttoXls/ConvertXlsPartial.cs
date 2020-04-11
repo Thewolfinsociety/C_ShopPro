@@ -121,10 +121,34 @@ namespace TexttoXls
 
         }
 
+        private string GetUnderline(FontUnderlineType fontunderlinetype)
+        {
+            switch (fontunderlinetype)
+            {
+                case FontUnderlineType.Single:
+                    return "font-underline:SINGLE;";
+                case FontUnderlineType.Double:
+                    return "font-underline:DOUBLE;";
+                case FontUnderlineType.SingleAccounting:
+                    return "font-underline:SINGLEACCOUNTING;";
+                case FontUnderlineType.DoubleAccounting:
+                    return "font-underline:DOUBLEACCOUNTING;";
+                case FontUnderlineType.None:
+                    return "";
+                default:
+                    return "";
+            }
+        }
+
         private string GetCellStyle(ICell cell, IWorkbook mywk)
         {
+            
             ICellStyle cellStyle = cell.CellStyle;
+            
             IFont font = cellStyle.GetFont(mywk);
+            //Console.WriteLine(cellStyle.FontIndex.ToString());
+            //Console.WriteLine(font.Index.ToString()+cell.ToString());
+            //Console.WriteLine(font.ToString());
             string Result = "";
             short weight = font.Boldweight;   //字体加粗
             if (weight == 700)
@@ -149,7 +173,9 @@ namespace TexttoXls
 
             string bordertype = GetBoderStyle(cellStyle); //边框
             Result = Result + bordertype;
-
+            
+            string fontunderline = GetUnderline(font.Underline); //下划线
+            Result = Result + fontunderline;
 
             if (cellStyle.WrapText)
             {

@@ -44,7 +44,7 @@ namespace TexttoXls
         void RemoveOneRow(int k, int mrow);
         void RemoveOneCol(int k, int mrow, int mcol);
         void InsertRow(int k, int mrow);
-        void InsertPicture(int k, int startrow, int startcol, string PicturePath);
+        void InsertPicture(int k, int startrow, int startcol, int lastrow, int lastcol, string PicturePath);
         void HideCol(int k, int mcol, bool ishide);
         void ChangeSheetName(int k, string sheetname);
         void SetColor(int k, int mrow, int mcol, short R, short G, short B);
@@ -57,7 +57,9 @@ namespace TexttoXls
         string ExcelToHtml(int i);
         //增加excel to json
         string XlsToJson(string xls);    //excel 转 json
-      
+        
+        void Insertbase64Picture(int k, int startrow, int startcol, int lastrow, int lastcol, string base64);
+        string Getbase64PictureTest(int k);
     }
 
     [Guid("34F268AE-FDA9-4757-92ED-DF6AEB7D490E")]
@@ -199,7 +201,7 @@ namespace TexttoXls
             FileStream FileStreamfile = new FileStream(xlsfile, FileMode.Create);
             int sheetcount = wb.NumberOfSheets;
 
-            for (int i = 1; i < sheetcount; i++)
+            for (int i = 0; i < sheetcount; i++)
             {
                 ISheet sheet = wb.GetSheetAt(i);
                 sheet.ForceFormulaRecalculation = true;
@@ -635,7 +637,7 @@ namespace TexttoXls
         }
 
         //插入门图片
-        public void InsertPicture(int k, int startrow, int startcol, string PicturePath)//, float PictuteWidth, float PictureHeight
+        public void InsertPicture(int k, int startrow, int startcol, int lastrow, int lastcol, string PicturePath)//, float PictuteWidth, float PictureHeight
         {
             if (wb == null)
             {
@@ -645,11 +647,12 @@ namespace TexttoXls
             ISheet sheet = wb.GetSheetAt(k);
             startrow = startrow - 1;
             startcol = startcol - 1;
-            IRow row = sheet.GetRow(startrow);
+            //IRow row = sheet.GetRow(startrow);
             //int rowline = 1;//从第二行开始(索引从0开始)
             //IRow row = sheet.CreateRow(startrow);
             //设置行高 ,excel行高度每个像素点是1/20
-            row.Height = 80 * 20;
+            //if (row == null) row = sheet.CreateRow(startrow);
+            //row.Height = 80 * 20;
             //填入生产单号
             //row.CreateCell(0, CellType.String).SetCellValue("litao");
             //将图片文件读入一个字符串
@@ -715,7 +718,7 @@ namespace TexttoXls
             }
             HSSFPatriarch patriarch = (HSSFPatriarch)sheet.CreateDrawingPatriarch();
             // 插图片的位置  HSSFClientAnchor（dx1,dy1,dx2,dy2,col1,row1,col2,row2) 后面再作解释
-            HSSFClientAnchor anchor = new HSSFClientAnchor(0, 0, 0, 0, startcol, startrow, startcol + 5, startrow + 15);
+            HSSFClientAnchor anchor = new HSSFClientAnchor(0, 0, 0, 0, startcol, startrow, lastcol, lastrow);
             //把图片插到相应的位置
             HSSFPicture pict = (HSSFPicture)patriarch.CreatePicture(anchor, pictureIdx);
             //pict.Resize();
@@ -806,12 +809,12 @@ namespace TexttoXls
                     IRow row = sheet.GetRow(i);
                     if (row != null)
                     {
-                        
 
+                        short rowheight = (short)(row.Height / 20);
+                        rowheightobj.Add("L" + i.ToString(), rowheight);
                         for (int j = 0; j <= row.LastCellNum; j++)
                         {
-                            short rowheight = (short)(row.Height / 20);
-                            rowheightobj.Add("L" + i.ToString(), rowheight);
+                            
 
                             ICell cell = row.GetCell(j);
                             if (i == 0)
@@ -849,7 +852,12 @@ namespace TexttoXls
                 onesheet.Add("data", data);  // 添加data
                 onesheet.Add("RowHeight", rowheightobj);
                 onesheet.Add("ColumnWidth", colwidthobj);
+                //JArray pictures = new JArray();
+                string pictures = Getbase64PictureTest1(sheet);
+                onesheet.Add("pictures", pictures);
                 sheets.Add(onesheet);
+                
+
             }
             staff.Add("sheets", sheets);
             Result = staff.ToString();
@@ -875,8 +883,8 @@ namespace TexttoXls
 
     }
 
-    
 
+    
 
     /*public interface IXlsToJson
     {
@@ -918,7 +926,7 @@ namespace TexttoXls
                 }
 
             }
-
+            
 
         }
         public void closexls()
