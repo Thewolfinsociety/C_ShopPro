@@ -14,11 +14,13 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using NPOI.CSS;
 using NPOI.HSSF.Util;
-
 using Microsoft.Office.Interop;
 using NPOI.SS.Converter;
 using System.Text;
+
 //操作json
+
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
@@ -57,9 +59,11 @@ namespace TexttoXls
         string XlsToJson(string xls);    //excel 转 json
       
     }
+
     [Guid("34F268AE-FDA9-4757-92ED-DF6AEB7D490E")]
     [ClassInterface(ClassInterfaceType.None)]
-    public class ConvertXls : IConvertXls
+
+    public partial class ConvertXls : IConvertXls
     {
         private HSSFWorkbook wb = null;
         private string xlsfile = "";
@@ -758,6 +762,7 @@ namespace TexttoXls
             //}
         }
 
+<<<<<<< HEAD
         private string returnfontcolor(short color)
         {
 
@@ -1003,16 +1008,19 @@ namespace TexttoXls
 
             return result;
         }
+=======
+       
+>>>>>>> 6169ffd7a43626f77fd207f83ebcfbe35e3fd9f9
 
         public string XlsToJson(string xls)
         {
             string Result = "";
-
-            if (string.IsNullOrEmpty(xls))
+            //文件不存在就直接退出
+            if ((string.IsNullOrEmpty(xls)) || (! File.Exists(xls)))
             {
                 return "";//没有文件
             }
-            Console.WriteLine("\n\n1--创建json对象:");
+ 
             JObject staff = new JObject();
             FileStream file = new FileStream(xls, FileMode.Open, FileAccess.Read);
             HSSFWorkbook mywk = new HSSFWorkbook(file);
@@ -1045,7 +1053,11 @@ namespace TexttoXls
                     {
                         short rowheight = (short)(row.Height / 20);
                         rowheightobj.Add("L" + i.ToString(), rowheight);
+<<<<<<< HEAD
 
+=======
+                        //MessageBox.Show(row.LastCellNum.ToString());
+>>>>>>> 6169ffd7a43626f77fd207f83ebcfbe35e3fd9f9
                         for (int j = 0; j <= row.LastCellNum; j++)
                         {
                             ICell cell = row.GetCell(j);
@@ -1088,6 +1100,7 @@ namespace TexttoXls
             }
             staff.Add("sheets", sheets);
             Result = staff.ToString();
+            
             return Result;
 
 
