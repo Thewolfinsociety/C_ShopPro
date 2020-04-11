@@ -12,16 +12,13 @@ using System.Text.RegularExpressions;
 //using ZXing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-//MessageBox.Show(extension.ToLower());
-//20200227
 using NPOI.CSS;
 using NPOI.HSSF.Util;
 
 using Microsoft.Office.Interop;
 using NPOI.SS.Converter;
 using System.Text;
-
-
+//操作json
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
@@ -57,7 +54,7 @@ namespace TexttoXls
         string GetPathByXlsToHTML(string strFile);
         string ExcelToHtml(int i);
         //增加excel to json
-        string XlsToJson(string xls);
+        string XlsToJson(string xls);    //excel 转 json
       
     }
     [Guid("34F268AE-FDA9-4757-92ED-DF6AEB7D490E")]
@@ -66,7 +63,6 @@ namespace TexttoXls
     {
         private HSSFWorkbook wb = null;
         private string xlsfile = "";
-
 
         public void openxls(string xls)
         {
@@ -809,40 +805,56 @@ namespace TexttoXls
                     return "";
             }
         }
+
         private string ConvertBorderStyleToString(NPOI.SS.UserModel.BorderStyle boderstyle)
         {
-            string Result = "border-type:";
             switch (boderstyle)
             {
                 case NPOI.SS.UserModel.BorderStyle.Thin:
-                    return Result + "THIN;";
+                    return "THIN";
                 case NPOI.SS.UserModel.BorderStyle.Medium:
-                    return Result + "MEDIUM;";
+                    return "MEDIUM";
                 case NPOI.SS.UserModel.BorderStyle.Dashed:
-                    return Result + "DASHED;";
+                    return "DASHED";
                 case NPOI.SS.UserModel.BorderStyle.Hair:
-                    return Result + "HAIR;";
+                    return "HAIR";
                 case NPOI.SS.UserModel.BorderStyle.Thick:
-                    return Result + "THICK;";
+                    return "THICK";
                 case NPOI.SS.UserModel.BorderStyle.Double:
-                    return Result + "DOUBLE;";
+                    return "DOUBLE";
                 case NPOI.SS.UserModel.BorderStyle.Dotted:
-                    return Result + "DOTTED;";
+                    return "DOTTED";
                 case NPOI.SS.UserModel.BorderStyle.MediumDashed:
-                    return Result + "MEDIUMDASHED;";
+                    return "MEDIUMDASHED";
                 case NPOI.SS.UserModel.BorderStyle.DashDot:
-                    return Result + "DASHDOT;";
+                    return "DASHDOT";
                 case NPOI.SS.UserModel.BorderStyle.MediumDashDot:
-                    return Result + "MEDIUMDASHDOT;";
+                    return "MEDIUMDASHDOT";
                 case NPOI.SS.UserModel.BorderStyle.DashDotDot:
-                    return Result + "DASHDOTDOT;";
+                    return "DASHDOTDOT";
                 case NPOI.SS.UserModel.BorderStyle.MediumDashDotDot:
-                    return Result + "MEDIUMDASHDOTDOT;";
+                    return "MEDIUMDASHDOTDOT";
                 case NPOI.SS.UserModel.BorderStyle.SlantedDashDot:
-                    return Result + "SLANTEDDASHDOT;";
+                    return "SLANTEDDASHDOT";
                 default:
-                    return "";
+                    return "None";
             }
+        }
+        //边框分解 上 右 下 左
+        private string GetBoderStyle(ICellStyle cellstyle)
+        {
+            NPOI.SS.UserModel.BorderStyle boderstyle = cellstyle.BorderTop;
+            string Result = "border-type:";
+            string topboderstyle = ConvertBorderStyleToString(cellstyle.BorderTop);
+            string rightboderstyle = ConvertBorderStyleToString(cellstyle.BorderRight);
+            string bomboderstyle = ConvertBorderStyleToString(cellstyle.BorderBottom);
+            string leftboderstyle = ConvertBorderStyleToString(cellstyle.BorderLeft);
+            if ((topboderstyle == "") && (rightboderstyle == "") && (bomboderstyle == "") && (leftboderstyle == ""))
+            {
+                return "";
+            }
+            Result = Result + topboderstyle +" "+ rightboderstyle + " " + bomboderstyle + " " + leftboderstyle + ";";
+            return Result;
 
         }
         private string GetCellStyle(ICell cell, IWorkbook mywk)
@@ -871,8 +883,15 @@ namespace TexttoXls
             string textalign = ConvertHorizontalAlignmentToString(cellStyle.Alignment); //居中对齐
             Result = Result + textalign;
 
-            string bordertype = ConvertBorderStyleToString(cellStyle.BorderTop); //边框
+            string bordertype = GetBoderStyle(cellStyle); //边框
             Result = Result + bordertype;
+
+           
+            if (cellStyle.WrapText)
+            {
+                Result = Result + "WrapText:True";
+            }
+            
             return Result;
         }
 
@@ -1012,28 +1031,21 @@ namespace TexttoXls
                 JObject onesheet = new JObject();
                 ISheet sheet = mywk.GetSheetAt(k);
                
-
-                //HSSFSheet hssfSheet = mywk.GetSheetAt(k);
                 string sheetName = mywk.GetSheetName(k);    //读取当前表数据
                 onesheet.Add("sheetName", sheetName);
                 JObject data = new JObject();
-                //MessageBox.Show(sheet.LastRowNum.ToString());
                 JObject rowheightobj = new JObject();
                 JObject colwidthobj = new JObject();
-                //合并单元格
-                CellRangeAddress ca = sheet.GetMergedRegion(k);
-
 
                 for (int i = 0; i <= sheet.LastRowNum; i++)
                 {
                     JObject rowobj = new JObject();
                     IRow row = sheet.GetRow(i);
-
-                    short rowheight = (short)(row.Height / 20);
-                    rowheightobj.Add("L" + i.ToString(), rowheight);
                     if (row != null)
                     {
-                        //MessageBox.Show(row.LastCellNum.ToString());
+                        short rowheight = (short)(row.Height / 20);
+                        rowheightobj.Add("L" + i.ToString(), rowheight);
+
                         for (int j = 0; j <= row.LastCellNum; j++)
                         {
                             ICell cell = row.GetCell(j);
@@ -1041,17 +1053,16 @@ namespace TexttoXls
                             {
                                 float ColumnWidth = (float)((float)(sheet.GetColumnWidth(j)) / 256 - 0.63);
                                 colwidthobj.Add("C" + j.ToString(), ColumnWidth);
-
                             }
 
                             if (cell != null)
                             {
                                 string style = GetCellStyle(cell, mywk);
-                                //MessageBox.Show((cell.CellStyle.GetFont(mywk).Boldweight).ToString());                             
+                                                             
                                 JObject cellobj = new JObject();
                                 cellobj.Add("Text", cell.ToString());
                                 cellobj.Add("style", style);
-                                //MessageBox.Show(cell.ToString());
+                                
                                 rowobj.Add("C" + j.ToString(), cellobj);
 
                                 Dimension dimension;
@@ -1065,10 +1076,7 @@ namespace TexttoXls
                                         cellobj.Add("_mergeCount", dimension.ColumnSpan-1);
                                     }
                                 }
-                                
                             }
-                            
-
                         }
                     }
                     data.Add("L" + i.ToString(), rowobj);
