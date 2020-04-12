@@ -58,7 +58,7 @@ namespace TexttoXls
         //增加excel to json
         string XlsToJson(string xls);    //excel 转 json
         
-        void Insertbase64Picture(int k, int startrow, int startcol, int lastrow, int lastcol, string base64);
+        void Insertbase64Picture(int k, int startrow, int startcol, int lastrow, int lastcol, int anchorType, string base64);
         string Getbase64PictureTest(int k);
     }
 

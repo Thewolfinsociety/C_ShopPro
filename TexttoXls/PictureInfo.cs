@@ -16,15 +16,17 @@ namespace TexttoXls
         public int MaxRow { get; set; }
         public int MinCol { get; set; }
         public int MaxCol { get; set; }
+        public AnchorType AnchorType { get; set; }
         public Byte[] PictureData { get; private set; }
 
-        public PicturesInfo(int minRow, int maxRow, int minCol, int maxCol, Byte[] pictureData)
+        public PicturesInfo(int minRow, int maxRow, int minCol, int maxCol, Byte[] pictureData, AnchorType AnchorType)
         {
             this.MinRow = minRow;
             this.MaxRow = maxRow;
             this.MinCol = minCol;
             this.MaxCol = maxCol;
             this.PictureData = pictureData;
+            this.AnchorType = AnchorType;
         }
     }
 
@@ -64,11 +66,15 @@ namespace TexttoXls
                     if (shape is HSSFPicture && shape.Anchor is HSSFClientAnchor)
                     {
                         var picture = (HSSFPicture)shape;
+                        //Boolean isnofill = picture.IsNoFill;
+                        Console.WriteLine("ShapeType=" + picture.ShapeType);
                         var anchor = (HSSFClientAnchor)shape.Anchor;
 
                         if (IsInternalOrIntersect(minRow, maxRow, minCol, maxCol, anchor.Row1, anchor.Row2, anchor.Col1, anchor.Col2, onlyInternal))
                         {
-                            picturesInfoList.Add(new PicturesInfo(anchor.Row1, anchor.Row2, anchor.Col1, anchor.Col2, picture.PictureData.Data));
+
+                            Console.WriteLine("AnchorType=" + anchor.AnchorType);
+                            picturesInfoList.Add(new PicturesInfo(anchor.Row1, anchor.Row2, anchor.Col1, anchor.Col2, picture.PictureData.Data, anchor.AnchorType));
                         }
                     }
                 }
@@ -93,11 +99,12 @@ namespace TexttoXls
                         if (shape is XSSFPicture)
                         {
                             var picture = (XSSFPicture)shape;
+                         
                             var anchor = picture.GetPreferredSize();
 
                             if (IsInternalOrIntersect(minRow, maxRow, minCol, maxCol, anchor.Row1, anchor.Row2, anchor.Col1, anchor.Col2, onlyInternal))
                             {
-                                picturesInfoList.Add(new PicturesInfo(anchor.Row1, anchor.Row2, anchor.Col1, anchor.Col2, picture.PictureData.Data));
+                                picturesInfoList.Add(new PicturesInfo(anchor.Row1, anchor.Row2, anchor.Col1, anchor.Col2, picture.PictureData.Data, anchor.AnchorType));
                             }
                         }
                     }
@@ -143,6 +150,20 @@ namespace TexttoXls
                 picturesInfoObj.Add("endrow", picturesInfo.MaxRow);
                 picturesInfoObj.Add("endcol", picturesInfo.MaxCol);
                 picturesInfoObj.Add("picturedata", Convert.ToBase64String(picturesInfo.PictureData));
+                switch (picturesInfo.AnchorType)
+                {
+                    case AnchorType.MoveAndResize:
+                        picturesInfoObj.Add("AnchorType", 0);
+                        break;
+                    case AnchorType.MoveDontResize:
+                        picturesInfoObj.Add("AnchorType", 2);
+                        break;
+                    case AnchorType.DontMoveAndResize:
+                        picturesInfoObj.Add("AnchorType", 3);
+                        break;
+                    default:
+                        break;
+                }
                 picturesInfoListObj.Add(picturesInfoObj);
             }
 
@@ -189,7 +210,7 @@ namespace TexttoXls
         }
 
         //插入base64图片数据
-        public void Insertbase64Picture(int k, int startrow, int startcol, int lastrow, int lastcol, string base64)
+        public void Insertbase64Picture(int k, int startrow, int startcol, int lastrow, int lastcol, int anchorType, string base64)
         {
             if (wb == null)
             {
@@ -212,7 +233,26 @@ namespace TexttoXls
             byte[] buffer = ms2.GetBuffer();
             ms2.Close();
             int pictureIndex = wb.AddPicture(buffer, PictureType.PNG);
+            switch (anchorType)
+            {
+                case 0:
+                    anchor.AnchorType = AnchorType.MoveAndResize;
+                    break;
+                case 2:
+                    anchor.AnchorType = AnchorType.MoveDontResize;
+                    break;
+                case 3:
+                    anchor.AnchorType = AnchorType.DontMoveAndResize;
+                    break;
+                default:
+                    break;
+            }
+            
+
             HSSFPicture picture = (HSSFPicture)patriarch.CreatePicture(anchor, pictureIndex);
+            picture.IsNoFill = false;
+          
+            //picture.
         }
 
         //-------------------------插入图片--------------------------------

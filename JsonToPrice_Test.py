@@ -230,20 +230,20 @@ class JsonToPrice(object):
                 ChangeSheetName(k+1, sheetname)
 
 
-            if 'RowHeight' in sheet:
-                rowobj = sheet['RowHeight']
-                for row, height in rowobj.items():
-                    rownum = int(row[1:]) + 1
-                    logger.info(str(rownum) + '行高:' + str(height))
-                    SetCellRowHeight(k+1, rownum, height)
-
-            if 'ColumnWidth' in sheet:
-                print(sheet['ColumnWidth'])
-                colobj = sheet['ColumnWidth']
-                for col, width in colobj.items():
-                    colnum = int(col[1:]) + 1
-                    logger.info(str(colnum) + '列宽:' + str(width))
-                    SetCellColumnWidth(k+1, colnum, width)
+            # if 'RowHeight' in sheet:
+            #     rowobj = sheet['RowHeight']
+            #     for row, height in rowobj.items():
+            #         rownum = int(row[1:]) + 1
+            #         logger.info(str(rownum) + '行高:' + str(height))
+            #         SetCellRowHeight(k+1, rownum, height)
+            #
+            # if 'ColumnWidth' in sheet:
+            #     print(sheet['ColumnWidth'])
+            #     colobj = sheet['ColumnWidth']
+            #     for col, width in colobj.items():
+            #         colnum = int(col[1:]) + 1
+            #         logger.info(str(colnum) + '列宽:' + str(width))
+            #         SetCellColumnWidth(k+1, colnum, width)
 
 
             dataobj = sheet['data']  #data数据
@@ -259,10 +259,10 @@ class JsonToPrice(object):
                     j = int(onecolobj[1:]) +1 # j 代表第几列
                     cellobj = colobj[onecolobj] #单元格元素
                     print(k+1, i, j, str(cellobj['Text']))
-                    InsertCell(k+1, i, j, str(cellobj['Text']))
+                    #InsertCell(k+1, i, j, str(cellobj['Text']))
                     if '_mergeCount' in cellobj:
                         addcol = cellobj['_mergeCount']
-                        SetCellRangeAddress(k+1, i, i, j, j+addcol)   #int k, int rowstart, int rowend, int colstart, int colend
+                        #SetCellRangeAddress(k+1, i, i, j, j+addcol)   #int k, int rowstart, int rowend, int colstart, int colend
 
                     #必须存在单元格，改变颜色才有效
                     if 'style' in cellobj:
