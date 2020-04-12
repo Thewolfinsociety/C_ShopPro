@@ -235,6 +235,16 @@ namespace TexttoXls
             k = k - 1;
             string Result = "";
             ISheet sheet = wb.GetSheetAt(k);
+            sheet.PrintSetup.PaperSize = 9;
+            sheet.PrintSetup.Scale = 76;
+            Console.WriteLine(wb.GetPrintArea(0));
+            wb.SetPrintArea(k, 0, 11, 0, sheet.LastRowNum); //11 为列 25为行
+           
+            //sheet.IsPrintGridlines = true;
+            //sheet.FitToPage = false;
+            //sheet.PrintSetup.FitHeight = 10;
+            //sheet.PrintSetup.FitWidth = 10;
+            //sheet.PrintSetup.ValidSettings = false;
             mrow = mrow - 1;
             mcol = mcol - 1;
 
@@ -796,7 +806,7 @@ namespace TexttoXls
             {
                 JObject onesheet = new JObject();
                 ISheet sheet = mywk.GetSheetAt(k);
-               
+                
                 string sheetName = mywk.GetSheetName(k);    //读取当前表数据
                 onesheet.Add("sheetName", sheetName);
                 JObject data = new JObject();

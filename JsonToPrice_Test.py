@@ -230,20 +230,20 @@ class JsonToPrice(object):
                 ChangeSheetName(k+1, sheetname)
 
 
-            # if 'RowHeight' in sheet:
-            #     rowobj = sheet['RowHeight']
-            #     for row, height in rowobj.items():
-            #         rownum = int(row[1:]) + 1
-            #         logger.info(str(rownum) + '行高:' + str(height))
-            #         SetCellRowHeight(k+1, rownum, height)
-            #
-            # if 'ColumnWidth' in sheet:
-            #     print(sheet['ColumnWidth'])
-            #     colobj = sheet['ColumnWidth']
-            #     for col, width in colobj.items():
-            #         colnum = int(col[1:]) + 1
-            #         logger.info(str(colnum) + '列宽:' + str(width))
-            #         SetCellColumnWidth(k+1, colnum, width)
+            if 'RowHeight' in sheet:
+                rowobj = sheet['RowHeight']
+                for row, height in rowobj.items():
+                    rownum = int(row[1:]) + 1
+                    logger.info(str(rownum) + '行高:' + str(height))
+                    SetCellRowHeight(k+1, rownum, height)
+
+            if 'ColumnWidth' in sheet:
+                print(sheet['ColumnWidth'])
+                colobj = sheet['ColumnWidth']
+                for col, width in colobj.items():
+                    colnum = int(col[1:]) + 1
+                    logger.info(str(colnum) + '列宽:' + str(width))
+                    SetCellColumnWidth(k+1, colnum, width)
 
 
             dataobj = sheet['data']  #data数据
@@ -259,26 +259,20 @@ class JsonToPrice(object):
                     j = int(onecolobj[1:]) +1 # j 代表第几列
                     cellobj = colobj[onecolobj] #单元格元素
                     print(k+1, i, j, str(cellobj['Text']))
-                    #InsertCell(k+1, i, j, str(cellobj['Text']))
+                    InsertCell(k+1, i, j, str(cellobj['Text']))
                     if '_mergeCount' in cellobj:
                         addcol = cellobj['_mergeCount']
-                        #SetCellRangeAddress(k+1, i, i, j, j+addcol)   #int k, int rowstart, int rowend, int colstart, int colend
+                        SetCellRangeAddress(k+1, i, i, j, j+addcol)   #int k, int rowstart, int rowend, int colstart, int colend
 
                     #必须存在单元格，改变颜色才有效
                     if 'style' in cellobj:
-                        # style = cellobj['style']
-                        # if 'Color' in style:
-                        #     color = style['Color']
-                        #     R, G, B = self.ToRGBColor(color.upper())
-                        #     SetColor(k+1, i, j, R, G, B)
-                        #     logger.info(str(i) + '行,' + str(j)+'列'+',Color='+color+','+str(cellcolor[color]))
-
                         style = cellobj['style']
                         # thin 代表框的上横线一条细线， medium 中等线 dashed 虚线 hair 点线
                         # thick 厚 double 俩条线 medium_dashed 中厚虚线，
                         if style:
-                            print(k+1, i, j, style)
+                            #print(k+1, i, j, style)
                             SetCellStyle(k+1, i, j, style)
+
         #print(GetPathByXlsToHTML(excel))
             string = ExcelToHtml(k)
             htmlpath = ServerPath+'\\ExcelHtml\\'+str(k)+'_'+sheetsobj['fileName'] + '_' + self.guid+'.html'
@@ -286,37 +280,41 @@ class JsonToPrice(object):
                 os.makedirs(os.path.dirname(htmlpath))
             with open(htmlpath, 'w+', encoding='utf8') as f:
                 f.write(string)
-        closexls()
-        openxls(excel)
-        # with open('s.txt', 'r', encoding='utf8') as f:
-        #     picturelist = json.loads(f.read())
-        #     for picture in picturelist:
-        #         print(picture)
-        #         print(1, picture['startrow'], picture['startcol'], picture['endrow'], picture['endcol'],
-        #               picture['picturedata'])
-        #         print(type(picture['picturedata']))
-        #
-        #         Insertbase64Picture(1, picture['startrow'], picture['startcol'], picture['endrow'], picture['endcol'] + 1,
-        #                             picture['picturedata'])
-        for k in range(len(sheetsobj['sheets'])):
-            sheet = sheetsobj['sheets'][k]
+
             picturelistobj = sheet['pictures']
             picturelist = json.loads(picturelistobj)
+            print('len of picturelist=',len(picturelist))
             for picture in picturelist:
-                print(picture)
-                print(1, picture['startrow'], picture['startcol'], picture['endrow'], picture['endcol'],
-                      picture['picturedata'])
-                print(type(picture['picturedata']))
+                # print(picture)
+                # print(1, picture['startrow'], picture['startcol'], picture['endrow'], picture['endcol'],
+                # picture['picturedata'])
+                # print(type(picture['picturedata']))
 
-                Insertbase64Picture(1, picture['startrow'], picture['startcol'], picture['endrow']+1, picture['endcol'] + 1,
+                Insertbase64Picture(1, picture['startrow'], picture['startcol'], picture['endrow'] + 1,
+                                    picture['endcol'] + 1,picture['AnchorType'],
                                     picture['picturedata'])
-        # SetCellStyle(1, 3, 1, "font-weight:normal;font-name:宋体;font-size:12;text-align:CENTER;border-type:THIN None THIN MEDIUM;WrapText:True")
-
-
-
-
-
         closexls()
+        # openxls(excel)
+        # # with open('s.txt', 'r', encoding='utf8') as f:
+        # #     picturelist = json.loads(f.read())
+        # #     for picture in picturelist:
+        # #         print(picture)
+        # #         print(1, picture['startrow'], picture['startcol'], picture['endrow'], picture['endcol'],
+        # #               picture['picturedata'])
+        # #         print(type(picture['picturedata']))
+        # #
+        # #         Insertbase64Picture(1, picture['startrow'], picture['startcol'], picture['endrow'], picture['endcol'] + 1,
+        # #                             picture['picturedata'])
+        # for k in range(len(sheetsobj['sheets'])):
+        #     sheet = sheetsobj['sheets'][k]
+        #
+        # # SetCellStyle(1, 3, 1, "font-weight:normal;font-name:宋体;font-size:12;text-align:CENTER;border-type:THIN None THIN MEDIUM;WrapText:True")
+        #
+        #
+        #
+        #
+        #
+        # closexls()
         return excel
 
 application = tornado.web.Application([
@@ -350,7 +348,7 @@ def jsontoexcel():
     with open(excelPath, 'r', encoding='utf8') as f:
         datacontent = f.read()
     print(type(datacontent))
-    sheetsobj = json.loads(datacontent)
+
 
     guid = str(uuid.uuid1())  # 唯一标识符guid
     guid = ''.join(guid.split('-'))
@@ -375,7 +373,6 @@ def exceltojson():
     excel = base_dir + '\\Python3\\Server\\Dll\\exceltojson\\经销商订货表.xls'
     #excel = base_dir + '\\reports\\pricesourceTest.xls'
     if not os.path.exists(excel):
-        print(123)
         state = CopyFile(srcexcelfile, excel)
         print(state)
 
@@ -416,29 +413,29 @@ def TestInterface():
     else:
         os.remove(excel)
         CopyFile(srcexcelfile, excel)
-    openxls(excel)
+    #openxls(excel)
     pngfile = base_dir + '\\reports\\图片1.png'
 
     # 测试插入图片文件
     #InsertPicture(1,1,1,1,12,pngfile)startrow, int startcol, int lastrow, int lastcol
     #测试获取图片信息
-    pictureliststring = Getbase64PictureTest(1)
-    closexls()
-    picturelist = json.loads(pictureliststring)
-    excel = base_dir + '\\reports\\零售订货表诗尼曼.xls'
+    #pictureliststring = Getbase64PictureTest(1)
+    #closexls()
+    #picturelist = json.loads(pictureliststring)
+    excel = base_dir + '\\reports\\转换后010.xls'
     openxls(excel)
-    print(picturelist)
-    with open('s.txt', 'w+', encoding='utf8') as f:
-        f.write(json.dumps(picturelist, ensure_ascii=False))
-    with open('s.txt', 'r', encoding='utf8') as f:
-        picturelist = json.loads(f.read())
-
-    for picture in picturelist:
-        print(1, picture['startrow'], picture['startcol'], picture['endrow'], picture['endcol'],  picture['picturedata'])
-        print(type(picture['picturedata']))
-
-        Insertbase64Picture(1, picture['startrow'], picture['startcol'], picture['endrow'], picture['endcol']+1, picture['picturedata'])
-    #SetCellStyle(1, 3, 1, "font-weight:normal;font-name:宋体;font-size:12;text-align:CENTER;border-type:THIN None THIN MEDIUM;WrapText:True")
+    # print(picturelist)
+    # with open('s.txt', 'w+', encoding='utf8') as f:
+    #     f.write(json.dumps(picturelist, ensure_ascii=False))
+    # with open('s.txt', 'r', encoding='utf8') as f:
+    #     picturelist = json.loads(f.read())
+    #
+    # for picture in picturelist:
+    #     print(1, picture['startrow'], picture['startcol'], picture['endrow'], picture['endcol'],  picture['picturedata'])
+    #     print(type(picture['picturedata']))
+    #
+    #     Insertbase64Picture(1, picture['startrow'], picture['startcol'], picture['endrow'], picture['endcol']+1, picture['picturedata'])
+    SetCellStyle(1, 3, 1, "font-weight:normal;font-name:宋体;font-size:12;text-align:CENTER;border-type:THIN None THIN MEDIUM;WrapText:True")
     closexls()
 
 def exceltohtml():
@@ -473,9 +470,9 @@ if __name__=='__main__':
     print(ServerPath)
     #TestInterface()
     #jsontoexcel()
-    #TestInterface()
-    exceltojson()
-    jsontoexcel()
+    TestInterface()
+    #exceltojson()
+    #jsontoexcel()
     # excelPath = base_dir + '\\Python3\\Server\\Dll\\excel\\'
     # if not os.path.exists(excelPath):
     #     os.makedirs(excelPath)
