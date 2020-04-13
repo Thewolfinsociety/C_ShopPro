@@ -60,6 +60,8 @@ namespace TexttoXls
         
         void Insertbase64Picture(int k, int startrow, int startcol, int lastrow, int lastcol, int anchorType, string base64);
         string Getbase64PictureTest(int k);
+
+        void SetPrintArea(int k, string printsetup); //设置打印区域
     }
 
     [Guid("34F268AE-FDA9-4757-92ED-DF6AEB7D490E")]
@@ -228,6 +230,7 @@ namespace TexttoXls
             ISheet sheet = wb.GetSheetAt(k);
             CellRangeAddress cellRangeAddress = new CellRangeAddress(rowstart, rowend, colstart, colend);
             sheet.AddMergedRegion(cellRangeAddress);
+            
         }
 
         public void SetCellStyle(int k, int mrow, int mcol, string CssStyle)
@@ -235,16 +238,7 @@ namespace TexttoXls
             k = k - 1;
             string Result = "";
             ISheet sheet = wb.GetSheetAt(k);
-            sheet.PrintSetup.PaperSize = 9;
-            sheet.PrintSetup.Scale = 76;
-            Console.WriteLine(wb.GetPrintArea(0));
-            wb.SetPrintArea(k, 0, 11, 0, sheet.LastRowNum); //11 为列 25为行
-           
-            //sheet.IsPrintGridlines = true;
-            //sheet.FitToPage = false;
-            //sheet.PrintSetup.FitHeight = 10;
-            //sheet.PrintSetup.FitWidth = 10;
-            //sheet.PrintSetup.ValidSettings = false;
+            
             mrow = mrow - 1;
             mcol = mcol - 1;
 
@@ -262,7 +256,24 @@ namespace TexttoXls
             cell.CSS(CssStyle);
 
         }
+        public void SetPrintArea(int k, string printsetup)
+        {
+            k = k - 1;
+            string Result = "";
+            ISheet sheet = wb.GetSheetAt(k);
+            PrintSet printset = JsonConvert.DeserializeObject<PrintSet>(printsetup);
+            sheet.PrintSetup.Scale = printset.Scale;
+            sheet.PrintSetup.PaperSize = printset.PaperSize;
+            Console.WriteLine("Printarea="+ printset.Printarea);
+          
+            string printarea = printset.Printarea;
+            if (string.IsNullOrEmpty(printarea)) return;
+            int index = printarea.IndexOf("!");
+            if (index == -1) return;
+            string parea = printarea.Substring(index+1, printarea.Length-index-1);
+            wb.SetPrintArea(k, parea);
 
+        }
         public void SetColor(int k, int mrow, int mcol, short R, short G, short B)
         {
             k = k - 1;
@@ -338,6 +349,12 @@ namespace TexttoXls
                 return;
             }
             wb.SetSheetName(k, sheetname);
+            //wb.CreateSheet(sheetname);//克隆原有sheet页作为基础
+
+            
+            //wb.SetSheetOrder(sheetname, k);//将最新的sheet页挪到第一页
+        
+
         }
         //获取第k sheet 第mrow 行， 第mcol 列内容
         //C# 和delphi 行号差1
@@ -797,6 +814,7 @@ namespace TexttoXls
             string fileName = Path.GetFileName(xls).ToLower();
             staff.Add("type", fileType);
             staff.Add("fileName", fileName);
+            
             file.Close();
 
             JArray sheets = new JArray();
@@ -806,7 +824,17 @@ namespace TexttoXls
             {
                 JObject onesheet = new JObject();
                 ISheet sheet = mywk.GetSheetAt(k);
-                
+                string printarea = mywk.GetPrintArea(k);
+                JObject printsetup = new JObject();
+                printsetup.Add("PrintArea", printarea);
+                printsetup.Add("Scale", sheet.PrintSetup.Scale);
+                printsetup.Add("PaperSize", sheet.PrintSetup.PaperSize);
+     
+                //if (string.IsNullOrEmpty(printarea)) printsetup.Add("PrintArea", printarea);
+                //if (sheet.PrintSetup.Scale != 100) printsetup.Add("Scale", sheet.PrintSetup.Scale);
+                //if (sheet.PrintSetup.PaperSize != 9) printsetup.Add("PaperSize", sheet.PrintSetup.PaperSize);
+                onesheet.Add("printsetup", printsetup.ToString());
+
                 string sheetName = mywk.GetSheetName(k);    //读取当前表数据
                 onesheet.Add("sheetName", sheetName);
                 JObject data = new JObject();

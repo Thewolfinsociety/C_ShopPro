@@ -18,6 +18,13 @@ using NPOI.HSSF.Record;
 
 namespace TexttoXls
 {
+    public class PrintSet
+    {
+        public string Printarea { set; get; }
+        public short Scale { set; get; }
+        public short PaperSize { set; get; }
+    }
+
     public partial class ConvertXls : IConvertXls
     {
         private string returnfontcolor(short color)
