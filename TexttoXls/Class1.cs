@@ -264,15 +264,21 @@ namespace TexttoXls
             PrintSet printset = JsonConvert.DeserializeObject<PrintSet>(printsetup);
             sheet.PrintSetup.Scale = printset.Scale;
             sheet.PrintSetup.PaperSize = printset.PaperSize;
-            Console.WriteLine("Printarea="+ printset.Printarea);
-          
+            //Console.WriteLine("Printarea="+ printset.Printarea);
+            //Console.WriteLine("GetPrintArea=" + wb.GetPrintArea(k));
             string printarea = printset.Printarea;
+            if (!string.IsNullOrEmpty(printset.HL)) sheet.Header.Left = printset.HL;
+            if (!string.IsNullOrEmpty(printset.HR)) sheet.Header.Right = printset.HR;
+            if (!string.IsNullOrEmpty(printset.HC)) sheet.Header.Center = printset.HC;
+            if (!string.IsNullOrEmpty(printset.FL)) sheet.Footer.Left = printset.FL;
+            if (!string.IsNullOrEmpty(printset.FR)) sheet.Footer.Right = printset.FR;
+            if (!string.IsNullOrEmpty(printset.FC)) sheet.Footer.Center = printset.FC;
             if (string.IsNullOrEmpty(printarea)) return;
             int index = printarea.IndexOf("!");
             if (index == -1) return;
             string parea = printarea.Substring(index+1, printarea.Length-index-1);
             wb.SetPrintArea(k, parea);
-
+            
         }
         public void SetColor(int k, int mrow, int mcol, short R, short G, short B)
         {
@@ -829,7 +835,14 @@ namespace TexttoXls
                 printsetup.Add("PrintArea", printarea);
                 printsetup.Add("Scale", sheet.PrintSetup.Scale);
                 printsetup.Add("PaperSize", sheet.PrintSetup.PaperSize);
-     
+                //页眉页脚
+                
+                printsetup.Add("HL", sheet.Header.Left);
+                printsetup.Add("HC", sheet.Header.Center);
+                printsetup.Add("HR", sheet.Header.Right);
+                printsetup.Add("FL", sheet.Footer.Left);
+                printsetup.Add("FC", sheet.Footer.Center);
+                printsetup.Add("FR", sheet.Footer.Right);
                 //if (string.IsNullOrEmpty(printarea)) printsetup.Add("PrintArea", printarea);
                 //if (sheet.PrintSetup.Scale != 100) printsetup.Add("Scale", sheet.PrintSetup.Scale);
                 //if (sheet.PrintSetup.PaperSize != 9) printsetup.Add("PaperSize", sheet.PrintSetup.PaperSize);

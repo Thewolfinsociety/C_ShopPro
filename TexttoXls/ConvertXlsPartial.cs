@@ -23,6 +23,14 @@ namespace TexttoXls
         public string Printarea { set; get; }
         public short Scale { set; get; }
         public short PaperSize { set; get; }
+        public string HL { set; get; }
+        public string HC { set; get; }
+        public string HR { set; get; }
+        public string FL { set; get; }
+        public string FC { set; get; }
+        public string FR { set; get; }
+
+
     }
 
     public partial class ConvertXls : IConvertXls
