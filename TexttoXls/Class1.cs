@@ -267,18 +267,50 @@ namespace TexttoXls
             //Console.WriteLine("Printarea="+ printset.Printarea);
             //Console.WriteLine("GetPrintArea=" + wb.GetPrintArea(k));
             string printarea = printset.Printarea;
+            //设置页眉页脚
             if (!string.IsNullOrEmpty(printset.HL)) sheet.Header.Left = printset.HL;
             if (!string.IsNullOrEmpty(printset.HR)) sheet.Header.Right = printset.HR;
             if (!string.IsNullOrEmpty(printset.HC)) sheet.Header.Center = printset.HC;
             if (!string.IsNullOrEmpty(printset.FL)) sheet.Footer.Left = printset.FL;
             if (!string.IsNullOrEmpty(printset.FR)) sheet.Footer.Right = printset.FR;
             if (!string.IsNullOrEmpty(printset.FC)) sheet.Footer.Center = printset.FC;
+            //获取页边距
+            sheet.SetMargin(MarginType.TopMargin, printset.tmargin);
+            sheet.SetMargin(MarginType.RightMargin, printset.rmargin);
+            sheet.SetMargin(MarginType.BottomMargin, printset.bmargin);
+            sheet.SetMargin(MarginType.LeftMargin, printset.lmargin);
+            sheet.SetMargin(MarginType.HeaderMargin, printset.hmargin);
+            sheet.SetMargin(MarginType.FooterMargin, printset.fmargin);
+            //设置打印预览分页
+
+            //sheet.FitToPage = false;
+            //sheet.SetRowBreak(10); //分行
+            //设置打印区域[只需要获取模板信息]
+            //Console.WriteLine("printarea=" + printarea);
             if (string.IsNullOrEmpty(printarea)) return;
             int index = printarea.IndexOf("!");
             if (index == -1) return;
-            string parea = printarea.Substring(index+1, printarea.Length-index-1);
+            var vs = printarea.Split('$');
+            string parea = "";
+            switch (vs.Length)
+            {
+                case 5:
+                    vs[4] = sheet.LastRowNum.ToString();
+                    parea = "$" + vs[1] + "$" + vs[2] + "$" + vs[3] + "$" + vs[4];
+                    break;
+                default:
+                    break;
+            }
+
+            //Console.WriteLine("LastRowNum=" + sheet.LastRowNum.ToString());
+            //Console.WriteLine("parea=" + parea);
+            //int colindex = printarea.IndexOf(":");
+            //string colnum = printarea.Substring(colindex + 1, 1);
+            //string num = printarea.Substring(colindex + 2, printarea.Length - colindex - 2);
+            //string parea = printarea.Substring(index+1, printarea.Length-index-1);
+
             wb.SetPrintArea(k, parea);
-            
+
         }
         public void SetColor(int k, int mrow, int mcol, short R, short G, short B)
         {
@@ -836,13 +868,26 @@ namespace TexttoXls
                 printsetup.Add("Scale", sheet.PrintSetup.Scale);
                 printsetup.Add("PaperSize", sheet.PrintSetup.PaperSize);
                 //页眉页脚
-                
                 printsetup.Add("HL", sheet.Header.Left);
                 printsetup.Add("HC", sheet.Header.Center);
                 printsetup.Add("HR", sheet.Header.Right);
                 printsetup.Add("FL", sheet.Footer.Left);
                 printsetup.Add("FC", sheet.Footer.Center);
                 printsetup.Add("FR", sheet.Footer.Right);
+                //获取页边距
+                double tmargin = sheet.GetMargin(MarginType.TopMargin); //上边距
+                double lmargin = sheet.GetMargin(MarginType.LeftMargin); //左边距
+                double rmargin = sheet.GetMargin(MarginType.RightMargin); //右边距
+                double bmargin = sheet.GetMargin(MarginType.BottomMargin); //下边距
+                double hmargin = sheet.GetMargin(MarginType.HeaderMargin); //页眉距
+                double fmargin = sheet.GetMargin(MarginType.FooterMargin); //页脚边距
+                printsetup.Add("tmargin", tmargin);
+                printsetup.Add("lmargin", lmargin);
+                printsetup.Add("rmargin", rmargin);
+                printsetup.Add("bmargin", bmargin);
+                printsetup.Add("hmargin", hmargin);
+                printsetup.Add("fmargin", fmargin);
+                
                 //if (string.IsNullOrEmpty(printarea)) printsetup.Add("PrintArea", printarea);
                 //if (sheet.PrintSetup.Scale != 100) printsetup.Add("Scale", sheet.PrintSetup.Scale);
                 //if (sheet.PrintSetup.PaperSize != 9) printsetup.Add("PaperSize", sheet.PrintSetup.PaperSize);

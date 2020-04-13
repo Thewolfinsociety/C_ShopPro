@@ -29,8 +29,12 @@ namespace TexttoXls
         public string FL { set; get; }
         public string FC { set; get; }
         public string FR { set; get; }
-
-
+        public Double tmargin { set; get; }
+        public Double rmargin { set; get; }
+        public Double bmargin { set; get; }
+        public Double lmargin { set; get; }
+        public Double hmargin { set; get; }
+        public Double fmargin { set; get; }
     }
 
     public partial class ConvertXls : IConvertXls
