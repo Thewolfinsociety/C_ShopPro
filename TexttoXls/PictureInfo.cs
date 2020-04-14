@@ -192,7 +192,6 @@ namespace TexttoXls
         // 获取图片信息
         public JArray Getbase64Picture(ISheet sheet)
         {
-         
             List<PicturesInfo> picturesInfoList = sheet.GetAllPictureInfos();
             JArray picturesInfoListObj = new JArray();
             foreach (var picturesInfo in picturesInfoList)

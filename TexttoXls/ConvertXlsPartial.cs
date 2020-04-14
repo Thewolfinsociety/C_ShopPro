@@ -200,7 +200,8 @@ namespace TexttoXls
             {
                 Result = Result + "WrapText:True";
             }
-
+            if (Result == "font-weight:normal;font-name:宋体;font-size:12;text-align:CENTER;border-type:None None None None;WrapText:True")
+                Result = "";
             return Result;
         }
 

@@ -78,8 +78,6 @@ namespace TexttoXls
             wb = new HSSFWorkbook(file);
             HSSFPalette palette = wb.GetCustomPalette();
             //调色板实例
-
-            palette.SetColorAtIndex((short)8, (byte)0, (byte)0, (byte)0);
             xlsfile = xls;
             file.Close();
 
@@ -837,126 +835,147 @@ namespace TexttoXls
 
         public string XlsToJson(string xls)
         {
-            string Result = "";
-            //文件不存在就直接退出
-            if ((string.IsNullOrEmpty(xls)) || (! File.Exists(xls)))
-            {
-                return "";//没有文件
-            }
- 
-            JObject staff = new JObject();
-            FileStream file = new FileStream(xls, FileMode.Open, FileAccess.Read);
-            HSSFWorkbook mywk = new HSSFWorkbook(file);
-            xlsfile = xls;
-            string fileType = Path.GetExtension(xls).ToLower();
-            string fileName = Path.GetFileName(xls).ToLower();
-            staff.Add("type", fileType);
-            staff.Add("fileName", fileName);
             
-            file.Close();
+            string Result = "";
+            try
 
-            JArray sheets = new JArray();
-
-
-            for (int k = 0; k < mywk.NumberOfSheets; k++)
             {
-                JObject onesheet = new JObject();
-                ISheet sheet = mywk.GetSheetAt(k);
-                string printarea = mywk.GetPrintArea(k);
-                JObject printsetup = new JObject();
-                printsetup.Add("PrintArea", printarea);
-                printsetup.Add("Scale", sheet.PrintSetup.Scale);
-                printsetup.Add("PaperSize", sheet.PrintSetup.PaperSize);
-                //页眉页脚
-                printsetup.Add("HL", sheet.Header.Left);
-                printsetup.Add("HC", sheet.Header.Center);
-                printsetup.Add("HR", sheet.Header.Right);
-                printsetup.Add("FL", sheet.Footer.Left);
-                printsetup.Add("FC", sheet.Footer.Center);
-                printsetup.Add("FR", sheet.Footer.Right);
-                //获取页边距
-                double tmargin = sheet.GetMargin(MarginType.TopMargin); //上边距
-                double lmargin = sheet.GetMargin(MarginType.LeftMargin); //左边距
-                double rmargin = sheet.GetMargin(MarginType.RightMargin); //右边距
-                double bmargin = sheet.GetMargin(MarginType.BottomMargin); //下边距
-                double hmargin = sheet.GetMargin(MarginType.HeaderMargin); //页眉距
-                double fmargin = sheet.GetMargin(MarginType.FooterMargin); //页脚边距
-                printsetup.Add("tmargin", tmargin);
-                printsetup.Add("lmargin", lmargin);
-                printsetup.Add("rmargin", rmargin);
-                printsetup.Add("bmargin", bmargin);
-                printsetup.Add("hmargin", hmargin);
-                printsetup.Add("fmargin", fmargin);
-                
-                //if (string.IsNullOrEmpty(printarea)) printsetup.Add("PrintArea", printarea);
-                //if (sheet.PrintSetup.Scale != 100) printsetup.Add("Scale", sheet.PrintSetup.Scale);
-                //if (sheet.PrintSetup.PaperSize != 9) printsetup.Add("PaperSize", sheet.PrintSetup.PaperSize);
-                onesheet.Add("printsetup", printsetup.ToString());
-
-                string sheetName = mywk.GetSheetName(k);    //读取当前表数据
-                onesheet.Add("sheetName", sheetName);
-                JObject data = new JObject();
-                JObject rowheightobj = new JObject();
-                JObject colwidthobj = new JObject();
-
-                for (int i = 0; i <= sheet.LastRowNum; i++)
+                //文件不存在就直接退出
+                if ((string.IsNullOrEmpty(xls)) || (!File.Exists(xls)))
                 {
-                    JObject rowobj = new JObject();
-                    IRow row = sheet.GetRow(i);
-                    if (row != null)
+                    return "";//没有文件
+                }
+
+                JObject staff = new JObject();
+                FileStream file = new FileStream(xls, FileMode.Open, FileAccess.Read);
+                HSSFWorkbook mywk = new HSSFWorkbook(file);
+                xlsfile = xls;
+                string fileType = Path.GetExtension(xls).ToLower();
+                string fileName = Path.GetFileName(xls).ToLower();
+                staff.Add("type", fileType);
+                staff.Add("fileName", fileName);
+
+                file.Close();
+
+                JArray sheets = new JArray();
+
+
+                for (int k = 0; k < mywk.NumberOfSheets; k++)
+                {
+                    JObject onesheet = new JObject();
+                    ISheet sheet = mywk.GetSheetAt(k);
+                    string printarea = mywk.GetPrintArea(k);
+                    JObject printsetup = new JObject();
+                    printsetup.Add("PrintArea", printarea);
+                    printsetup.Add("Scale", sheet.PrintSetup.Scale);
+                    printsetup.Add("PaperSize", sheet.PrintSetup.PaperSize);
+                    //页眉页脚
+                    Console.WriteLine(sheet.Header);
+                    //string hleft = sheet.Header.Left;
+                    //if (string.IsNullOrEmpty(sheet.Header.Left)) Console.WriteLine("hello");
+                    //Console.WriteLine("left=" + sheet.Header.Left);
+                    try
+                    {
+                        Console.WriteLine(sheet.Header.Left);
+                    }
+                    catch(Exception e)
                     {
 
-                        short rowheight = (short)(row.Height / 20);
-                        rowheightobj.Add("L" + i.ToString(), rowheight);
-                        for (int j = 0; j <= row.LastCellNum; j++)
+                        throw e;
+                    }
+                    //printsetup.Add("HC", sheet.Header.Center);
+                    //printsetup.Add("HR", sheet.Header.Right);
+                    printsetup.Add("FL", sheet.Footer.Left);
+                    printsetup.Add("FC", sheet.Footer.Center);
+                    printsetup.Add("FR", sheet.Footer.Right);
+                    //获取页边距
+                    double tmargin = sheet.GetMargin(MarginType.TopMargin); //上边距
+                    double lmargin = sheet.GetMargin(MarginType.LeftMargin); //左边距
+                    double rmargin = sheet.GetMargin(MarginType.RightMargin); //右边距
+                    double bmargin = sheet.GetMargin(MarginType.BottomMargin); //下边距
+                    double hmargin = sheet.GetMargin(MarginType.HeaderMargin); //页眉距
+                    double fmargin = sheet.GetMargin(MarginType.FooterMargin); //页脚边距
+                    printsetup.Add("tmargin", tmargin);
+                    printsetup.Add("lmargin", lmargin);
+                    printsetup.Add("rmargin", rmargin);
+                    printsetup.Add("bmargin", bmargin);
+                    printsetup.Add("hmargin", hmargin);
+                    printsetup.Add("fmargin", fmargin);
+
+                    //if (string.IsNullOrEmpty(printarea)) printsetup.Add("PrintArea", printarea);
+                    //if (sheet.PrintSetup.Scale != 100) printsetup.Add("Scale", sheet.PrintSetup.Scale);
+                    //if (sheet.PrintSetup.PaperSize != 9) printsetup.Add("PaperSize", sheet.PrintSetup.PaperSize);
+                    onesheet.Add("printsetup", printsetup.ToString());
+
+                    string sheetName = mywk.GetSheetName(k);    //读取当前表数据
+                    onesheet.Add("sheetName", sheetName);
+                    JObject data = new JObject();
+                    JObject rowheightobj = new JObject();
+                    JObject colwidthobj = new JObject();
+
+                    for (int i = 0; i <= sheet.LastRowNum; i++)
+                    {
+                        JObject rowobj = new JObject();
+                        IRow row = sheet.GetRow(i);
+                        if (row != null)
                         {
-                            
 
-                            ICell cell = row.GetCell(j);
-                            if (i == 0)
+                            short rowheight = (short)(row.Height / 20);
+                            rowheightobj.Add("L" + i.ToString(), rowheight);
+                            for (int j = 0; j <= row.LastCellNum; j++)
                             {
-                                float ColumnWidth = (float)((float)(sheet.GetColumnWidth(j)) / 256 - 0.63);
-                                colwidthobj.Add("C" + j.ToString(), ColumnWidth);
-                            }
-
-                            if (cell != null)
-                            {
-                                string style = GetCellStyle(cell, mywk);
-                                                             
-                                JObject cellobj = new JObject();
-                                cellobj.Add("Text", cell.ToString());
-                                cellobj.Add("style", style);
-                                
-                                rowobj.Add("C" + j.ToString(), cellobj);
-
-                                Dimension dimension;
-                                bool result = IsMergeCell(sheet, i, j, out dimension);
-                                if (result)
+                                ICell cell = row.GetCell(j);
+                                if (i == 0)
                                 {
-                                    cellobj.Add("rowSpan", dimension.RowSpan.ToString());
-                                    cellobj.Add("columnSpan", dimension.ColumnSpan.ToString());
-                                    if ((i == dimension.FirstRowIndex) && (j == dimension.FirstColumnIndex))
+                                    float ColumnWidth = (float)((float)(sheet.GetColumnWidth(j)) / 256 - 0.63);
+                                    colwidthobj.Add("C" + j.ToString(), ColumnWidth);
+                                }
+
+                                if (cell != null)
+                                {
+                                    string style = GetCellStyle(cell, mywk);
+
+                                    JObject cellobj = new JObject();
+                                    cellobj.Add("Text", cell.ToString());
+                                    if (style != "")
+                                        cellobj.Add("style", style);
+
+                                    rowobj.Add("C" + j.ToString(), cellobj);
+
+                                    Dimension dimension;
+                                    bool result = IsMergeCell(sheet, i, j, out dimension);
+                                    if (result)
                                     {
-                                        cellobj.Add("_mergeCount", dimension.ColumnSpan-1);
+                                        cellobj.Add("rowSpan", dimension.RowSpan.ToString());
+                                        cellobj.Add("columnSpan", dimension.ColumnSpan.ToString());
+                                        if ((i == dimension.FirstRowIndex) && (j == dimension.FirstColumnIndex))
+                                        {
+                                            cellobj.Add("_mergeCount", dimension.ColumnSpan - 1);
+                                        }
                                     }
                                 }
                             }
                         }
+                        data.Add("L" + i.ToString(), rowobj);
                     }
-                    data.Add("L" + i.ToString(), rowobj);
+                    onesheet.Add("data", data);  // 添加data
+                    onesheet.Add("RowHeight", rowheightobj);
+                    onesheet.Add("ColumnWidth", colwidthobj);
+                    //JArray pictures = new JArray();
+                    string pictures = Getbase64PictureTest1(sheet);
+                    onesheet.Add("pictures", pictures);
+                    sheets.Add(onesheet);
+
+
                 }
-                onesheet.Add("data", data);  // 添加data
-                onesheet.Add("RowHeight", rowheightobj);
-                onesheet.Add("ColumnWidth", colwidthobj);
-                //JArray pictures = new JArray();
-                string pictures = Getbase64PictureTest1(sheet);
-                onesheet.Add("pictures", pictures);
-                sheets.Add(onesheet);
-                
+                staff.Add("sheets", sheets);
+                Result = staff.ToString();
+            }
+            finally
+            {
+
 
             }
-            staff.Add("sheets", sheets);
-            Result = staff.ToString();
             
             return Result;
 
