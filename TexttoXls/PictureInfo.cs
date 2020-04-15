@@ -8,8 +8,182 @@ using System.Drawing;
 using NPOI.XSSF.UserModel;
 using Newtonsoft.Json.Linq;
 
+
 namespace TexttoXls
 {
+    using System;
+    using System.Collections;
+    using System.Text.RegularExpressions;
+    using System.Text;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    public abstract class HeaderFooter1 : IHeaderFooter
+    {
+        protected bool stripFields = false;
+
+        /**
+         * @return the internal text representation (combining center, left and right parts).
+         * Possibly empty string if no header or footer is set.  Never <c>null</c>.
+         */
+
+        public abstract String RawText { get; }
+        private String[] SplitParts()
+        {
+            String text = RawText;
+            // default values
+            String _left = "";
+            String _center = "";
+            String _right = "";
+
+            while (text.Length > 1)
+            {
+                if (text[0] != '&')
+                {
+                    _center = text;
+                    break;
+                }
+                int pos = text.Length;
+                switch (text[1])
+                {
+                    case 'L':
+                        if (text.IndexOf("&C", StringComparison.Ordinal) >= 0)
+                        {
+                            pos = Math.Min(pos, text.IndexOf("&C", StringComparison.Ordinal));
+                        }
+                        if (text.IndexOf("&R", StringComparison.Ordinal) >= 0)
+                        {
+                            pos = Math.Min(pos, text.IndexOf("&R", StringComparison.Ordinal));
+                        }
+                        _left = text.Substring(2, pos - 2);
+                        text = text.Substring(pos);
+                        break;
+                    case 'C':
+                        if (text.IndexOf("&L", StringComparison.Ordinal) >= 0)
+                        {
+                            pos = Math.Min(pos, text.IndexOf("&L", StringComparison.Ordinal));
+                        }
+                        if (text.IndexOf("&R", StringComparison.Ordinal) >= 0)
+                        {
+                            pos = Math.Min(pos, text.IndexOf("&R", StringComparison.Ordinal));
+                        }
+                        _center = text.Substring(2, pos - 2);
+                        text = text.Substring(pos);
+                        break;
+                    case 'R':
+                        if (text.IndexOf("&C", StringComparison.Ordinal) >= 0)
+                        {
+                            pos = Math.Min(pos, text.IndexOf("&C", StringComparison.Ordinal));
+                        }
+                        if (text.IndexOf("&L", StringComparison.Ordinal) >= 0)
+                        {
+                            pos = Math.Min(pos, text.IndexOf("&L", StringComparison.Ordinal));
+                        }
+                        _right = text.Substring(2, pos - 2);
+                        text = text.Substring(pos);
+                        break;
+                    default:
+                        _center = text;
+                        break;
+                }
+            }
+            return new String[] { _left, _center, _right, };
+        }
+
+        /// <summary>
+        /// Creates the complete footer string based on the left, center, and middle
+        /// strings.
+        /// </summary>
+        /// <param name="parts">The parts.</param>
+ 
+  
+        /// <summary>
+        /// Sets the header footer text.
+        /// </summary>
+        /// <param name="text">the new header footer text (contains mark-up tags). Possibly
+        /// empty string never </param>
+   
+
+        /// <summary>
+        /// Get the left side of the header or footer.
+        /// </summary>
+        /// <value>The string representing the left side.</value>
+        public String Left
+        {
+            get
+            {
+                try
+                {
+                    return SplitParts()[0];
+                }
+                catch
+                {
+                    return "";
+                }
+                
+            }
+            set
+            {
+               
+            }
+        }
+        /// <summary>
+        /// Get the center of the header or footer.
+        /// </summary>
+        /// <value>The string representing the center.</value>
+        public String Center
+        {
+            get
+            {
+                return SplitParts()[1];
+            }
+            set
+            {
+              
+            }
+        }
+
+        /// <summary>
+        /// Get the right side of the header or footer.
+        /// </summary>
+        /// <value>The string representing the right side..</value>
+        public String Right
+        {
+            get
+            {
+                return SplitParts()[2];
+            }
+            set
+            {
+               
+            }
+        }
+
+        /// <summary>
+        /// Returns the string that represents the change in font size.
+        /// </summary>
+        /// <param name="size">the new font size.</param>
+        /// <returns>The special string to represent a new font size</returns>
+        public static String FontSize(short size)
+        {
+            return "&" + size;
+        }
+
+        /// <summary>
+        /// Returns the string that represents the change in font.
+        /// </summary>
+        /// <param name="font">the new font.</param>
+        /// <param name="style">the fonts style, one of regular, italic, bold, italic bold or bold italic.</param>
+        /// <returns>The special string to represent a new font size</returns>
+        public static String Font(String font, String style)
+        {
+            return "&\"" + font + "," + style + "\"";
+        }
+
+   
+    }
+
+
+
     public class PicturesInfo
     {
         public int MinRow { get; set; }

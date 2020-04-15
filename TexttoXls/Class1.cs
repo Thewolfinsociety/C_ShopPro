@@ -829,8 +829,70 @@ namespace TexttoXls
         }
 
 
-    
-        
+
+
+        private String[] SplitParts(string RawText)
+        {
+            String text = RawText;
+            // default values
+            String _left = "";
+            String _center = "";
+            String _right = "";
+            while (text.Length > 1)
+            {
+                if (text[0] != '&')
+                {
+                    _center = text;
+                    break;
+                }
+                int pos = text.Length;
+                switch (text[1])
+                {
+                    case 'L':
+                        if (text.IndexOf("&C", StringComparison.Ordinal) >= 0)
+                        {
+                            pos = Math.Min(pos, text.IndexOf("&C", StringComparison.Ordinal));
+                        }
+                        if (text.IndexOf("&R", StringComparison.Ordinal) >= 0)
+                        {
+                            pos = Math.Min(pos, text.IndexOf("&R", StringComparison.Ordinal));
+                        }
+                        _left = text.Substring(2, pos - 2);
+                        text = text.Substring(pos);
+                        break;
+                    case 'C':
+                        if (text.IndexOf("&L", StringComparison.Ordinal) >= 0)
+                        {
+                            pos = Math.Min(pos, text.IndexOf("&L", StringComparison.Ordinal));
+                        }
+                        if (text.IndexOf("&R", StringComparison.Ordinal) >= 0)
+                        {
+                            pos = Math.Min(pos, text.IndexOf("&R", StringComparison.Ordinal));
+                        }
+                        _center = text.Substring(2, pos - 2);
+                        text = text.Substring(pos);
+                        break;
+                    case 'R':
+                        if (text.IndexOf("&C", StringComparison.Ordinal) >= 0)
+                        {
+                            pos = Math.Min(pos, text.IndexOf("&C", StringComparison.Ordinal));
+                        }
+                        if (text.IndexOf("&L", StringComparison.Ordinal) >= 0)
+                        {
+                            pos = Math.Min(pos, text.IndexOf("&L", StringComparison.Ordinal));
+                        }
+                        _right = text.Substring(2, pos - 2);
+                        text = text.Substring(pos);
+                        break;
+                    default:
+                        _center = text;
+                        text = "";
+                        break;
+                }
+            }
+            return new String[] { _left, _center, _right, };
+      
+        }
 
 
         public string XlsToJson(string xls)
@@ -869,25 +931,39 @@ namespace TexttoXls
                     printsetup.Add("PrintArea", printarea);
                     printsetup.Add("Scale", sheet.PrintSetup.Scale);
                     printsetup.Add("PaperSize", sheet.PrintSetup.PaperSize);
+
+
+                    string RawText = ((NPOI.HSSF.UserModel.HSSFHeader)sheet.Header).RawText;
+                    //string left = ((NPOI.HSSF.UserModel.HSSFHeader)sheet.Header).Left;
                     //页眉页脚
-                    Console.WriteLine(sheet.Header);
+                    //Console.WriteLine(sheet.Header.ToString());
+                    //Console.WriteLine(sheet.Footer.ToString());
                     //string hleft = sheet.Header.Left;
                     //if (string.IsNullOrEmpty(sheet.Header.Left)) Console.WriteLine("hello");
                     //Console.WriteLine("left=" + sheet.Header.Left);
-                    try
-                    {
-                        Console.WriteLine(sheet.Header.Left);
-                    }
-                    catch(Exception e)
-                    {
 
-                        throw e;
-                    }
+                    //try
+                    //{
+                    // string hl = sheet.Header.Left;
+                    //}
+                    //catch(Exception e)
+                    //{
+                    //    Console.WriteLine(e);
+                    //throw e;
+                    //}
                     //printsetup.Add("HC", sheet.Header.Center);
                     //printsetup.Add("HR", sheet.Header.Right);
-                    printsetup.Add("FL", sheet.Footer.Left);
-                    printsetup.Add("FC", sheet.Footer.Center);
-                    printsetup.Add("FR", sheet.Footer.Right);
+                    String[]  v = SplitParts(RawText);
+                    printsetup.Add("HL", v[0]);
+                    printsetup.Add("HC", v[1]);
+                    printsetup.Add("HR", v[2]);
+
+                    RawText = ((NPOI.HSSF.UserModel.HSSFFooter)sheet.Footer).RawText;
+                    v = SplitParts(RawText);
+                    printsetup.Add("FL", v[0]);
+                    printsetup.Add("FC", v[1]);
+                    printsetup.Add("FR", v[2]);
+
                     //获取页边距
                     double tmargin = sheet.GetMargin(MarginType.TopMargin); //上边距
                     double lmargin = sheet.GetMargin(MarginType.LeftMargin); //左边距
