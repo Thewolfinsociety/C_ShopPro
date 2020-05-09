@@ -7,7 +7,8 @@ using System.IO;
 using System.Drawing;
 using NPOI.XSSF.UserModel;
 using Newtonsoft.Json.Linq;
-
+using NPOI.SS.Util;
+using ZXing;
 
 namespace TexttoXls
 {
@@ -17,172 +18,59 @@ namespace TexttoXls
     using System.Text;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    public abstract class HeaderFooter1 : IHeaderFooter
+
+    public class MyQRCode
     {
-        protected bool stripFields = false;
-
-        /**
-         * @return the internal text representation (combining center, left and right parts).
-         * Possibly empty string if no header or footer is set.  Never <c>null</c>.
-         */
-
-        public abstract String RawText { get; }
-        private String[] SplitParts()
+        private byte[] BitmapToBytes(Bitmap bitmap)
         {
-            String text = RawText;
-            // default values
-            String _left = "";
-            String _center = "";
-            String _right = "";
-
-            while (text.Length > 1)
+            byte[] byteImage = { };
+            try
             {
-                if (text[0] != '&')
+                MemoryStream stream = new MemoryStream();
+                bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Bmp);
+                byteImage = new Byte[stream.Length];
+                byteImage = stream.ToArray();
+                stream.Close();
+            }
+            catch
+            {
+            }
+            return byteImage;
+        }
+        public void CreateQRCode(HSSFWorkbook wb, ISheet sheet, string value, int rownum, int colnum)
+        {
+            //todo 计算二维码的大小和位置
+            int sheetmergecount = sheet.NumMergedRegions;
+            rownum = rownum - 1;
+            colnum = colnum - 1;
+            for (int k = sheetmergecount - 1; k >= 0; k--)
+            {
+                CellRangeAddress ca = sheet.GetMergedRegion(k);
+                if ((rownum >= ca.FirstRow) && (rownum <= ca.LastRow) && (colnum >= ca.FirstColumn) && (colnum <= ca.LastColumn))
                 {
-                    _center = text;
+                    BarcodeWriter writer = new BarcodeWriter();
+                    writer.Format = BarcodeFormat.QR_CODE;
+                    writer.Options.Hints.Add(EncodeHintType.CHARACTER_SET, "UTF-8");//编码问题
+                    writer.Options.Hints.Add(EncodeHintType.ERROR_CORRECTION, ZXing.QrCode.Internal.ErrorCorrectionLevel.H);
+                    writer.Options.Height = writer.Options.Width = 256;
+                    writer.Options.Margin = 1;//设置边框
+                    ZXing.Common.BitMatrix bm = writer.Encode(value);
+                    Bitmap img = writer.Write(bm);
+                    byte[] buffer = BitmapToBytes(img);
+
+                    if (buffer == null) break;
+                    HSSFClientAnchor anchor;
+                    anchor = new HSSFClientAnchor(0, 0, 0, 0, ca.FirstColumn, ca.FirstRow, ca.LastColumn + 1, ca.LastRow + 1);
+
+                    anchor.AnchorType = (AnchorType)2;
+                    HSSFPatriarch patriarch = (HSSFPatriarch)sheet.CreateDrawingPatriarch();
+                    int pictureIndex = wb.AddPicture(buffer, PictureType.JPEG);
+                    HSSFPicture picture = (HSSFPicture)patriarch.CreatePicture(anchor, pictureIndex);
                     break;
                 }
-                int pos = text.Length;
-                switch (text[1])
-                {
-                    case 'L':
-                        if (text.IndexOf("&C", StringComparison.Ordinal) >= 0)
-                        {
-                            pos = Math.Min(pos, text.IndexOf("&C", StringComparison.Ordinal));
-                        }
-                        if (text.IndexOf("&R", StringComparison.Ordinal) >= 0)
-                        {
-                            pos = Math.Min(pos, text.IndexOf("&R", StringComparison.Ordinal));
-                        }
-                        _left = text.Substring(2, pos - 2);
-                        text = text.Substring(pos);
-                        break;
-                    case 'C':
-                        if (text.IndexOf("&L", StringComparison.Ordinal) >= 0)
-                        {
-                            pos = Math.Min(pos, text.IndexOf("&L", StringComparison.Ordinal));
-                        }
-                        if (text.IndexOf("&R", StringComparison.Ordinal) >= 0)
-                        {
-                            pos = Math.Min(pos, text.IndexOf("&R", StringComparison.Ordinal));
-                        }
-                        _center = text.Substring(2, pos - 2);
-                        text = text.Substring(pos);
-                        break;
-                    case 'R':
-                        if (text.IndexOf("&C", StringComparison.Ordinal) >= 0)
-                        {
-                            pos = Math.Min(pos, text.IndexOf("&C", StringComparison.Ordinal));
-                        }
-                        if (text.IndexOf("&L", StringComparison.Ordinal) >= 0)
-                        {
-                            pos = Math.Min(pos, text.IndexOf("&L", StringComparison.Ordinal));
-                        }
-                        _right = text.Substring(2, pos - 2);
-                        text = text.Substring(pos);
-                        break;
-                    default:
-                        _center = text;
-                        break;
-                }
-            }
-            return new String[] { _left, _center, _right, };
-        }
-
-        /// <summary>
-        /// Creates the complete footer string based on the left, center, and middle
-        /// strings.
-        /// </summary>
-        /// <param name="parts">The parts.</param>
- 
-  
-        /// <summary>
-        /// Sets the header footer text.
-        /// </summary>
-        /// <param name="text">the new header footer text (contains mark-up tags). Possibly
-        /// empty string never </param>
-   
-
-        /// <summary>
-        /// Get the left side of the header or footer.
-        /// </summary>
-        /// <value>The string representing the left side.</value>
-        public String Left
-        {
-            get
-            {
-                try
-                {
-                    return SplitParts()[0];
-                }
-                catch
-                {
-                    return "";
-                }
-                
-            }
-            set
-            {
-               
             }
         }
-        /// <summary>
-        /// Get the center of the header or footer.
-        /// </summary>
-        /// <value>The string representing the center.</value>
-        public String Center
-        {
-            get
-            {
-                return SplitParts()[1];
-            }
-            set
-            {
-              
-            }
-        }
-
-        /// <summary>
-        /// Get the right side of the header or footer.
-        /// </summary>
-        /// <value>The string representing the right side..</value>
-        public String Right
-        {
-            get
-            {
-                return SplitParts()[2];
-            }
-            set
-            {
-               
-            }
-        }
-
-        /// <summary>
-        /// Returns the string that represents the change in font size.
-        /// </summary>
-        /// <param name="size">the new font size.</param>
-        /// <returns>The special string to represent a new font size</returns>
-        public static String FontSize(short size)
-        {
-            return "&" + size;
-        }
-
-        /// <summary>
-        /// Returns the string that represents the change in font.
-        /// </summary>
-        /// <param name="font">the new font.</param>
-        /// <param name="style">the fonts style, one of regular, italic, bold, italic bold or bold italic.</param>
-        /// <returns>The special string to represent a new font size</returns>
-        public static String Font(String font, String style)
-        {
-            return "&\"" + font + "," + style + "\"";
-        }
-
-   
     }
-
-
 
     public class PicturesInfo
     {
@@ -313,7 +201,7 @@ namespace TexttoXls
     {
         public string Getbase64PictureTest1(ISheet sheet)
         {
-          
+
             List<PicturesInfo> picturesInfoList = sheet.GetAllPictureInfos();
             JArray picturesInfoListObj = new JArray();
             foreach (var picturesInfo in picturesInfoList)
@@ -382,6 +270,17 @@ namespace TexttoXls
             return picturesInfoListObj;
         }
 
+        public void InsertMyQRCode(int k, int startrow, int startcol, string value)
+        {
+            if (wb == null)
+            {
+                return;
+            }
+            k = k - 1;
+            ISheet sheet = wb.GetSheetAt(k);
+            MyQRCode mrcode = new MyQRCode();
+            mrcode.CreateQRCode(wb, sheet, value, startrow, startcol);
+        }
         //插入base64图片数据
         public void Insertbase64Picture(int k, int startrow, int startcol, int lastrow, int lastcol, int anchorType, string base64)
         {

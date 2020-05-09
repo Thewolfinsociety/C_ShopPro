@@ -61,6 +61,7 @@ namespace TexttoXls
         void Insertbase64Picture(int k, int startrow, int startcol, int lastrow, int lastcol, int anchorType, string base64);
         string Getbase64PictureTest(int k);
 
+        void InsertMyQRCode(int k, int startrow, int startcol, string value); //插入k表,开始行， 开始列的合并单元格的 二维码，值为value
         void SetPrintArea(int k, string printsetup); //设置打印区域
     }
 
@@ -87,7 +88,7 @@ namespace TexttoXls
         {
             for (int i = 1; i <= nums; i = i + 1)
             {
-                wb.CreateSheet("sheet" + i.ToString());
+                wb.CreateSheet("EXCELSHEET" + i.ToString());
             }
 
         }
@@ -254,6 +255,7 @@ namespace TexttoXls
             cell.CSS(CssStyle);
 
         }
+
         public void SetPrintArea(int k, string printsetup)
         {
             k = k - 1;
@@ -310,6 +312,7 @@ namespace TexttoXls
             wb.SetPrintArea(k, parea);
 
         }
+
         public void SetColor(int k, int mrow, int mcol, short R, short G, short B)
         {
             k = k - 1;
@@ -914,7 +917,7 @@ namespace TexttoXls
                 xlsfile = xls;
                 string fileType = Path.GetExtension(xls).ToLower();
                 string fileName = Path.GetFileName(xls).ToLower();
-                staff.Add("type", fileType);
+                staff.Add("type", fileType.Remove(0,1));
                 staff.Add("fileName", fileName);
 
                 file.Close();
@@ -1027,6 +1030,7 @@ namespace TexttoXls
                                         if ((i == dimension.FirstRowIndex) && (j == dimension.FirstColumnIndex))
                                         {
                                             cellobj.Add("_mergeCount", dimension.ColumnSpan - 1);
+                                            cellobj.Add("_rowmergeCount", dimension.RowSpan - 1);
                                         }
                                     }
                                 }

@@ -39,10 +39,10 @@ namespace TexttoXls
 
     public partial class ConvertXls : IConvertXls
     {
-        private string returnfontcolor(short color)
+        private string returnrgbcolor(short color)
         {
 
-            string Result = "font - color:";
+ 
             HSSFPalette mypalette = new HSSFPalette(new PaletteRecord());
             HSSFColor hssFColor = mypalette.GetColor(color);
             if (hssFColor == null) return "";
@@ -50,6 +50,8 @@ namespace TexttoXls
             int r = rgb[0];
             int g = rgb[1];
             int b = rgb[2];
+            //Console.WriteLine("r=" + r + "g=" + g + "b=" + b);
+            if (r == 0 && b == 0 && g == 0) return "";
             string R = Convert.ToString(r, 16);
             if (R == "0")
                 R = "00";
@@ -59,10 +61,29 @@ namespace TexttoXls
             string B = Convert.ToString(b, 16);
             if (B == "0")
                 B = "00";
-            Result = Result + "#" + R + G + B + ";";
+            string Result = "#" + R + G + B + ";";
             return Result;
         }
+        private string returnfontcolor(short color)
+        {
 
+            string Result = "font-color:";
+            string rgbcolor = returnrgbcolor(color);
+            if (rgbcolor == "") return "";
+            Result = Result + rgbcolor;
+           
+            return Result;
+        }
+        private string returnbackgroundcolor(short color)
+        {
+
+            string Result = "background-color:";
+            string rgbcolor = returnrgbcolor(color);
+            //Console.WriteLine(rgbcolor);
+            if (rgbcolor == "") return "";
+            Result = Result + rgbcolor;
+            return Result;
+        }
         private string ConvertHorizontalAlignmentToString(NPOI.SS.UserModel.HorizontalAlignment alignment)
         {
             string Result = "text-align:";
@@ -196,7 +217,12 @@ namespace TexttoXls
             string fontunderline = GetUnderline(font.Underline); //下划线
             Result = Result + fontunderline;
 
-            if (cellStyle.WrapText)
+            color = cellStyle.FillForegroundColor; //背景颜色
+            //Console.WriteLine("color="+color);
+            Result = Result + returnbackgroundcolor(color);
+            
+
+            if (cellStyle.WrapText)    //自动换行
             {
                 Result = Result + "WrapText:True";
             }
