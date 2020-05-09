@@ -1,9 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2041
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Base64ToImage", "Base64ToImage\Base64ToImage.csproj", "{6DCECC48-A281-420F-953C-953670B517B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TexttoXls", "TexttoXls\TexttoXls.csproj", "{1C266F5B-FA0D-4C53-A7E8-3F958A6A402B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{682DB1C0-11D5-4315-940E-FF89B138E9D5}"
+	ProjectSection(SolutionItems) = preProject
+		readme.md = readme.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,8 +22,15 @@ Global
 		{6DCECC48-A281-420F-953C-953670B517B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6DCECC48-A281-420F-953C-953670B517B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6DCECC48-A281-420F-953C-953670B517B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C266F5B-FA0D-4C53-A7E8-3F958A6A402B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C266F5B-FA0D-4C53-A7E8-3F958A6A402B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C266F5B-FA0D-4C53-A7E8-3F958A6A402B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C266F5B-FA0D-4C53-A7E8-3F958A6A402B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9EB67AC5-666F-4AFD-B2C5-63E6DDD4E86B}
 	EndGlobalSection
 EndGlobal
