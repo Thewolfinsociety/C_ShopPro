@@ -27,6 +27,13 @@ namespace Base64ToImage
                     DoConvert(datafile, savefile, format);
                 }
             }
+            else
+            {
+                string xmlfile = args[0];
+                string xml = System.IO.File.ReadAllText(xmlfile, System.Text.Encoding.Default);
+                BomApi bom = new BomApi();
+                bom.LoadXML2Bom(xml);
+            }
         }
 
         static void DoConvert(string datafile, string savefile, string format)
