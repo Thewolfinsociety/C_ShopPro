@@ -74,51 +74,8 @@ namespace Base64ToImage
         public XmlNode rootnode;
         public XmlDocument xdoc;
     }
-    class Myutil
-    {
-        static public string GetAttributeValue(XmlNode node, string attristring, string value, string defalut)
-        {
-            string result = "";
-            XmlAttribute attri = node.Attributes[attristring];
-            if (attri != null)
-            {
-                value = attri.Value;
-                result = value;
-                //int startrow = int.Parse(attri.Value);
-            }
-            if (value == "") result = defalut;
-            return result;
-        }
 
-        static public int GetAttributeValue(XmlNode node, string attristring, int value, int defalut)
-        {
-            int result = 0;
-            XmlAttribute attri = node.Attributes[attristring];
-            if (attri != null)
-            {
-                value = int.Parse(attri.Value);
-                result = value;
-                //int startrow = int.Parse(attri.Value);
-            }
-            if (value == 0) result = defalut;
-            return result;
-        }
-
-        static public float GetAttributeValue(XmlNode node, string attristring, float value, float defalut)
-        {
-            float result = 0;
-            XmlAttribute attri = node.Attributes[attristring];
-            if (attri != null)
-            {
-                value = float.Parse(attri.Value);
-                result = value;
-                //int startrow = int.Parse(attri.Value);
-            }
-            if (value == 0) result = defalut;
-            return result;
-        }
-    }
-    class BomApi : Myutil1
+    class BomApi : Myutil
     {
         public double length;
         public double breadth;
@@ -159,15 +116,63 @@ namespace Base64ToImage
         public int ImportXomItemForBom(ref BomParam param0, ref int id, ref int slino)
         {
             int Result = 0;
-            string ls = "";
+            string ls = "", childxml = "";
+            XmlNode node = null;
             BomParam param = new BomParam();
+            TExpress exp = new TExpress();
+
             param.blockmemo = "";
             XmlNode root = param0.rootnode;
-            string str = Myutil.GetAttributeValue(root, "模块备注", "", "");
+            string str = GetAttributeValue(root, "模块备注", "", "");
+            
             if (str != "")
             {
                 param0.blockmemo = str;
+                param0.blockmemo = param0.blockmemo.Replace("[宽]", param0.pl.ToString());
+                param0.blockmemo = param0.blockmemo.Replace("[深]", param0.pd.ToString());
+                param0.blockmemo = param0.blockmemo.Replace("[高]", param0.ph.ToString());
+
             }
+            str = GetAttributeValue(root, "类别", "", "");
+            if ((str == "趟门,趟门") || (str == "掩门,掩门"))
+            {
+                node = root.SelectSingleNode("模板");
+                if (node != null)
+                {
+                    childxml = "";
+                    if (node.ChildNodes.Count > 0) childxml = node.ChildNodes[0].OuterXml;
+                    return 0;
+                }
+
+            }
+
+            node = root.SelectSingleNode("我的模块");
+            if (node != null)
+            {
+
+                for (int i = 0; i <= node.ChildNodes.Count - 1; i++)
+                {
+                    XmlNode cnode = node.ChildNodes[i];
+                    if ((cnode.Name != "板件") && (cnode.Name != "五金") && (cnode.Name != "型材五金") && (cnode.Name != "模块") && (cnode.Name != "门板")) continue;
+                    childxml = "";
+                    if (cnode.ChildNodes.Count > 0) childxml = cnode.ChildNodes[0].OuterXml;
+                    if (childxml != "")
+                    {
+                        param = param0;
+                        if (cnode.ChildNodes.Count > 0)
+                        {
+                            param.rootnode = cnode.ChildNodes[0];
+                            param.xdoc = param0.xdoc;
+                            int childnum = ImportXomItemForBom( ref param, ref id, ref slino);
+                        } 
+                    }
+
+                }
+                      
+                          
+
+            }
+            
             return 0;
         }
         public string LoadXML2Bom(string xml)    //加载订单数据
