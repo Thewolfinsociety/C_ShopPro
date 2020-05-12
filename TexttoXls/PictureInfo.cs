@@ -68,6 +68,51 @@ namespace TexttoXls
                     HSSFPicture picture = (HSSFPicture)patriarch.CreatePicture(anchor, pictureIndex);
                     break;
                 }
+                else
+                {
+                    BarcodeWriter writer = new BarcodeWriter();
+                    writer.Format = BarcodeFormat.QR_CODE;
+                    writer.Options.Hints.Add(EncodeHintType.CHARACTER_SET, "UTF-8");//编码问题
+                    writer.Options.Hints.Add(EncodeHintType.ERROR_CORRECTION, ZXing.QrCode.Internal.ErrorCorrectionLevel.H);
+                    writer.Options.Height = writer.Options.Width = 256;
+                    writer.Options.Margin = 1;//设置边框
+                    ZXing.Common.BitMatrix bm = writer.Encode(value);
+                    Bitmap img = writer.Write(bm);
+                    byte[] buffer = BitmapToBytes(img);
+
+                    if (buffer == null) break;
+                    HSSFClientAnchor anchor;
+                    anchor = new HSSFClientAnchor(0, 0, 0, 0, colnum, rownum, colnum + 1, rownum + 1);
+
+                    anchor.AnchorType = (AnchorType)2;
+                    HSSFPatriarch patriarch = (HSSFPatriarch)sheet.CreateDrawingPatriarch();
+                    int pictureIndex = wb.AddPicture(buffer, PictureType.JPEG);
+                    HSSFPicture picture = (HSSFPicture)patriarch.CreatePicture(anchor, pictureIndex);
+                    break;
+
+                }
+            }
+
+            if (sheetmergecount == 0)
+            {
+                BarcodeWriter writer = new BarcodeWriter();
+                writer.Format = BarcodeFormat.QR_CODE;
+                writer.Options.Hints.Add(EncodeHintType.CHARACTER_SET, "UTF-8");//编码问题
+                writer.Options.Hints.Add(EncodeHintType.ERROR_CORRECTION, ZXing.QrCode.Internal.ErrorCorrectionLevel.H);
+                writer.Options.Height = writer.Options.Width = 256;
+                writer.Options.Margin = 1;//设置边框
+                ZXing.Common.BitMatrix bm = writer.Encode(value);
+                Bitmap img = writer.Write(bm);
+                byte[] buffer = BitmapToBytes(img);
+
+                if (buffer == null) return;
+                HSSFClientAnchor anchor;
+                anchor = new HSSFClientAnchor(0, 0, 0, 0, colnum, rownum, colnum + 1, rownum + 1);
+
+                anchor.AnchorType = (AnchorType)2;
+                HSSFPatriarch patriarch = (HSSFPatriarch)sheet.CreateDrawingPatriarch();
+                int pictureIndex = wb.AddPicture(buffer, PictureType.JPEG);
+                HSSFPicture picture = (HSSFPicture)patriarch.CreatePicture(anchor, pictureIndex);
             }
         }
     }
