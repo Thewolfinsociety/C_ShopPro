@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using ZXing;
 using System.Xml;
 using DataMatrix.net;
+using System.Linq;
 
 namespace Base64ToImage
 {
@@ -29,10 +30,50 @@ namespace Base64ToImage
             }
             else
             {
+                /*char[] OpSymbolArray = { '1', '2', ' '};
+               
+                char[] tmp = new char[64];
+                tmp[0] = '1';
+                tmp[1] = '\0';
+                string str = new string(OpSymbolArray);
+                //MessageBox.Show(str);
+                string a = str.ToString() + "123";
+                MessageBox.Show(a);
+                //MessageBox.Show("456" + "123");
+                char buf = '+';
+                string str1 = str;
+                int b = int.Parse(str1);
+                MessageBox.Show(int.Parse(str1).ToString());
+                if (OpSymbolArray.Contains(buf))
+                {
+                    //MessageBox.Show("hello");
+
+                }
+                if (buf.ToString() == "+")
+                {
+                   // MessageBox.Show("hello1");
+                }
+                string xmlfile = args[0];
+                string xml = System.IO.File.ReadAllText(xmlfile, System.Text.Encoding.Default);
+                char[] buf1 = xml.ToCharArray();
+
+                char c3 = (char)0;
+                for (int i = 0; i < xml.Length; i++)
+                {
+                    if (buf1[i] == 0)
+                    {
+                        MessageBox.Show("Hello2");
+                    }
+                }
+
+                
                 string xmlfile = args[0];
                 string xml = System.IO.File.ReadAllText(xmlfile, System.Text.Encoding.Default);
                 BomApi bom = new BomApi();
-                bom.LoadXML2Bom(xml);
+                bom.LoadXML2Bom(xml);*/
+                TExpress exp = new TExpress();
+                bool str = exp.IsNumeric("1223addd");
+
             }
         }
 

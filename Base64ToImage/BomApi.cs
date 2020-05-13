@@ -298,10 +298,6 @@ namespace Base64ToImage
             param.rootnode = root.ChildNodes[0];
             param.xdoc = xmlDoc;
             ImportXomItemForBom(ref param, ref id, ref slino);
-            //if attri <> nil then
-            //MyVariant(attri.Text, mVName[i], mVValue[j]);
-            //mC[j] := MyStrToInt(mVValue[j]);
-            //end;
             return "";
         }
     }
